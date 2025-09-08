@@ -4,13 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>دالي نجيب AI - تشخيص أعطال السيارات</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-            --accent-color: #e74c3c;
-            --light-color: #ecf0f1;
-            --dark-color: #34495e;
+            --primary-color: #3498db;
+            --secondary-color: #e74c3c;
+            --accent-color: #f39c12;
+            --dark-bg: #1a1a2e;
+            --card-bg: #16213e;
+            --text-color: #f0f0f0;
+            --input-bg: #0f3460;
+            --hover-color: #2980b9;
         }
         
         * {
@@ -21,9 +25,11 @@
         }
         
         body {
-            background-color: #f5f7fa;
-            color: #333;
+            background: linear-gradient(135deg, var(--dark-bg), #0d0d1a);
+            color: var(--text-color);
             line-height: 1.6;
+            min-height: 100vh;
+            padding-bottom: 20px;
         }
         
         .container {
@@ -33,13 +39,16 @@
         }
         
         header {
-            background: linear-gradient(135deg, var(--primary-color), var(--dark-color));
+            background: rgba(0, 0, 0, 0.7);
             color: white;
             padding: 20px 0;
             text-align: center;
-            border-radius: 0 0 10px 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 0 0 15px 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
             margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            position: relative;
+            border-bottom: 2px solid var(--primary-color);
         }
         
         .logo {
@@ -52,16 +61,73 @@
         .logo i {
             font-size: 2.5rem;
             margin-left: 10px;
+            color: var(--accent-color);
         }
         
         h1 {
             font-size: 2.2rem;
             margin-bottom: 10px;
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         }
         
         .subtitle {
             font-size: 1.1rem;
             opacity: 0.9;
+            color: #bbb;
+        }
+        
+        .developer-section {
+            position: absolute;
+            left: 20px;
+            top: 20px;
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 15px;
+            border-radius: 30px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .developer-section:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+        
+        .developer-img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary-color);
+            margin-left: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .developer-img:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 10px var(--primary-color);
+        }
+        
+        .developer-info {
+            color: white;
+        }
+        
+        .developer-info h3 {
+            font-size: 1rem;
+            margin-bottom: 3px;
+            color: var(--accent-color);
+        }
+        
+        .developer-info p {
+            font-size: 0.8rem;
+            opacity: 0.9;
+            color: var(--primary-color);
         }
         
         .app-container {
@@ -77,15 +143,17 @@
         }
         
         .card {
-            background: white;
-            border-radius: 10px;
+            background: var(--card-bg);
+            border-radius: 15px;
             padding: 25px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-            transition: transform 0.3s ease;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
         
         .card:hover {
             transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
         }
         
         .card-title {
@@ -94,6 +162,13 @@
             padding-bottom: 10px;
             border-bottom: 2px solid var(--secondary-color);
             font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .card-title i {
+            margin-left: 10px;
+            color: var(--accent-color);
         }
         
         .form-group {
@@ -104,81 +179,105 @@
             display: block;
             margin-bottom: 8px;
             font-weight: 600;
-            color: var(--dark-color);
+            color: var(--accent-color);
         }
         
-        input, select {
+        input, select, textarea {
             width: 100%;
             padding: 12px 15px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
+            background: var(--input-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
             font-size: 16px;
-            transition: border 0.3s;
+            transition: all 0.3s;
+            color: var(--text-color);
         }
         
-        input:focus, select:focus {
-            border-color: var(--secondary-color);
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--primary-color);
             outline: none;
-            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.3);
         }
         
         button {
-            background: var(--secondary-color);
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: white;
             border: none;
-            padding: 12px 25px;
-            border-radius: 6px;
+            padding: 15px 25px;
+            border-radius: 8px;
             cursor: pointer;
             font-size: 16px;
             font-weight: 600;
-            transition: background 0.3s;
+            transition: all 0.3s;
             width: 100%;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
         }
         
         button:hover {
-            background: var(--primary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(1px);
         }
         
         .result-container {
             display: none;
             margin-top: 20px;
             padding: 20px;
-            background: #f8f9fa;
-            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
             border-right: 4px solid var(--secondary-color);
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
         .error-title {
-            color: var(--accent-color);
+            color: var(--secondary-color);
             margin-bottom: 15px;
+            display: flex;
+            align-items: center;
         }
         
         .solution-title {
-            color: #27ae60;
+            color: #2ecc71;
             margin-top: 20px;
             margin-bottom: 15px;
+            display: flex;
+            align-items: center;
         }
         
         .error-item, .solution-item {
             margin-bottom: 10px;
             padding: 12px;
-            background: white;
-            border-radius: 6px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border-left: 3px solid var(--secondary-color);
+        }
+        
+        .solution-item {
+            border-left: 3px solid #2ecc71;
         }
         
         .history-item {
             padding: 15px;
             margin-bottom: 15px;
-            background: #f8f9fa;
+            background: rgba(0, 0, 0, 0.2);
             border-radius: 8px;
-            border-right: 3px solid var(--secondary-color);
+            border-right: 3px solid var(--primary-color);
             cursor: pointer;
-            transition: background 0.3s;
+            transition: all 0.3s;
         }
         
         .history-item:hover {
-            background: #e9ecef;
+            background: rgba(0, 0, 0, 0.3);
+            transform: translateX(-5px);
         }
         
         footer {
@@ -187,6 +286,9 @@
             padding: 20px;
             color: #777;
             font-size: 0.9rem;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
         
         .loading {
@@ -196,8 +298,8 @@
         }
         
         .loading-spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid var(--secondary-color);
+            border: 4px solid rgba(243, 243, 243, 0.2);
+            border-top: 4px solid var(--primary-color);
             border-radius: 50%;
             width: 40px;
             height: 40px;
@@ -209,23 +311,74 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        @media (max-width: 768px) {
+            .developer-section {
+                position: relative;
+                left: 0;
+                top: 0;
+                justify-content: center;
+                margin-top: 15px;
+                width: 100%;
+            }
+            
+            header {
+                padding-bottom: 30px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+        }
+        
+        .upload-btn {
+            background: var(--input-bg);
+            color: var(--text-color);
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 5px;
+            display: inline-block;
+            font-size: 14px;
+            border: 1px dashed var(--primary-color);
+            transition: all 0.3s;
+        }
+        
+        .upload-btn:hover {
+            background: rgba(52, 152, 219, 0.2);
+        }
+        
+        #imageUpload {
+            display: none;
+        }
     </style>
 </head>
 <body>
     <header>
         <div class="container">
             <div class="logo">
-                <i>🚗</i>
+                <i class="fas fa-car"></i>
                 <h1>دالي نجيب AI</h1>
             </div>
             <p class="subtitle">تشخيص أعطال السيارات باستخدام الذكاء الاصطناعي</p>
+            
+            <div class="developer-section">
+                <div class="developer-info">
+                    <h3>دالي نجيب</h3>
+                    <p>AI Developer</p>
+                </div>
+                <label for="imageUpload">
+                    <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" alt="صورة المطور" class="developer-img" id="profileImage">
+                </label>
+                <input type="file" id="imageUpload" accept="image/*">
+            </div>
         </div>
     </header>
 
     <div class="container">
         <div class="app-container">
             <div class="card">
-                <h2 class="card-title">أدخل معلومات سيارتك</h2>
+                <h2 class="card-title"><i class="fas fa-info-circle"></i> أدخل معلومات سيارتك</h2>
                 <div class="form-group">
                     <label for="carType">نوع السيارة</label>
                     <select id="carType">
@@ -240,12 +393,23 @@
                         <option value="mercedes">مرسيدس</option>
                         <option value="volkswagen">فولكسفاغن</option>
                         <option value="honda">هوندا</option>
+                        <option value="audi">أودي</option>
+                        <option value="renault">رينو</option>
+                        <option value="peugeot">بيجو</option>
+                        <option value="mazda">مازدا</option>
+                        <option value="mitsubishi">ميتسوبيشي</option>
+                        <option value="jeep">جيب</option>
+                        <option value="lexus">لكزس</option>
+                        <option value="volvo">فولفو</option>
+                        <option value="skoda">سكودا</option>
                     </select>
                 </div>
                 
                 <div class="form-group">
                     <label for="carModel">الموديل</label>
-                    <input type="text" id="carModel" placeholder="مثال: كورولا 2020">
+                    <select id="carModel" disabled>
+                        <option value="">اختر الموديل</option>
+                    </select>
                 </div>
                 
                 <div class="form-group">
@@ -262,10 +426,10 @@
                 
                 <div class="form-group">
                     <label for="symptoms">الأعراض الملاحظة</label>
-                    <textarea id="symptoms" rows="4" placeholder="صف الأعراض التي تلاحظها في سيارتك..." style="width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; font-family: inherit;"></textarea>
+                    <textarea id="symptoms" rows="4" placeholder="صف الأعراض التي تلاحظها في سيارتك..."></textarea>
                 </div>
                 
-                <button id="analyzeBtn">تحليل الأعطال</button>
+                <button id="analyzeBtn"><i class="fas fa-search"></i> تحليل الأعطال</button>
                 
                 <div class="loading" id="loadingIndicator">
                     <div class="loading-spinner"></div>
@@ -274,20 +438,20 @@
             </div>
             
             <div class="card">
-                <h2 class="card-title">نتائج التشخيص</h2>
+                <h2 class="card-title"><i class="fas fa-clipboard-list"></i> نتائج التشخيص</h2>
                 <div id="noResults" style="text-align: center; padding: 30px; color: #777;">
                     <p>سيظهر هنا نتائج تشخيص أعطال سيارتك بعد إدخال البيانات</p>
                 </div>
                 
                 <div class="result-container" id="resultsContainer">
-                    <h3 class="error-title">الأعطال المكتشفة:</h3>
+                    <h3 class="error-title"><i class="fas fa-exclamation-circle"></i> الأعطال المكتشفة:</h3>
                     <div id="errorsList"></div>
                     
-                    <h3 class="solution-title">الحلول المقترحة:</h3>
+                    <h3 class="solution-title"><i class="fas fa-wrench"></i> الحلول المقترحة:</h3>
                     <div id="solutionsList"></div>
                 </div>
                 
-                <h2 class="card-title" style="margin-top: 30px;">التشخيصات السابقة</h2>
+                <h2 class="card-title" style="margin-top: 30px;"><i class="fas fa-history"></i> التشخيصات السابقة</h2>
                 <div id="historyList"></div>
             </div>
         </div>
@@ -296,6 +460,7 @@
     <footer>
         <div class="container">
             <p>تطبيق دالي نجيب AI لتشخيص أعطال السيارات - &copy; 2023</p>
+            <p>تم التطوير بواسطة <strong>دالي نجيب</strong> - AI Developer</p>
         </div>
     </footer>
 
@@ -310,6 +475,29 @@
             option.textContent = year;
             yearSelect.appendChild(option);
         }
+        
+        // قاعدة بيانات الموديلات حسب نوع السيارة
+        const carModels = {
+            'toyota': ['كامري', 'كورولا', 'لاند كروزر', 'هايلكس', 'افانزا', 'ياريس', 'راف4', 'هايس', 'بريوس', 'فورتشنر'],
+            'nissan': ['صني', 'قاشقاي', 'باترول', 'اكستيرا', 'التيما', 'جوك', 'سنترا', 'اكستريل', 'ماكسيما', 'ارمادا'],
+            'hyundai': ['النترا', 'سوناتا', 'توسان', 'اكسنت', 'ازيرا', 'كريتا', 'فيرنا', 'H1', 'باليساد', 'فينيو'],
+            'kia': ['سيراتو', 'سبورتاج', 'سورينتو', 'بيكانتو', 'سول', 'كارينز', 'سيد', 'موهافي', 'نيرو', 'ريو'],
+            'chevrolet': ['كروز', 'أفيو', 'ماليبو', 'كابتيفا', 'تاهو', 'سيلفرادو', 'سبارك', 'ترافيرس', 'كمارو', 'ايكو'],
+            'ford': ['فوكس', 'فيوجن', 'ايدج', 'اكسبلورر', 'موستانج', 'ايكوسبورت', 'رابتر', 'رينجر', 'فيكتوريا', 'فليكس'],
+            'bmw': ['الفئة الثالثة', 'الفئة الخامسة', 'الفئة السابعة', 'X1', 'X3', 'X5', 'X6', 'Z4', 'i8', 'M5'],
+            'mercedes': ['الفئة C', 'الفئة E', 'الفئة S', 'GLC', 'GLE', 'GLA', 'CLA', 'Maybach', 'AMG GT', 'G-Class'],
+            'volkswagen': ['جيتا', 'باسات', 'تيجوان', 'توارغ', 'أماروك', 'سيROCCO', 'بولى', 'فيتو', 'ارونا', 'طوارق'],
+            'honda': ['سيفيك', 'أكورد', 'CR-V', 'سيتي', 'بيليت', 'فيت', 'أوديسي', 'بيilot', 'HR-V', 'جاز'],
+            'audi': ['A3', 'A4', 'A6', 'A8', 'Q3', 'Q5', 'Q7', 'Q8', 'TT', 'R8'],
+            'renault': ['ميجان', 'كوليوس', 'داستر', 'لوجان', 'سانديرو', 'كادجار', 'تاليسمان', 'كنجو', 'سيمبول', 'كوليوس'],
+            'peugeot': ['208', '301', '308', '408', '508', '2008', '3008', '5008', 'بارتنر', 'ريكسر'],
+            'mazda': ['مازدا 3', 'مازدا 6', 'CX-5', 'CX-9', 'CX-30', 'MX-5', 'RX-8', 'BT-50', 'CX-3', 'مازدا 2'],
+            'mitsubishi': ['لانسر', 'اوتلاندر', 'باجيرو', 'ASX', 'ECLIPSE', 'ميراج', 'اتراج', 'دليكا', 'Xpander', 'Triton'],
+            'jeep': ['جراند شيروكي', 'شيروكي', 'رينيجاد', 'كومباس', 'رانجلر', 'جلادياتور', 'رام', 'ليبرتي', 'باتريوت', 'راف'],
+            'lexus': ['ES', 'LS', 'RX', 'NX', 'GX', 'LX', 'IS', 'RC', 'UX', 'LC'],
+            'volvo': ['S60', 'S90', 'XC40', 'XC60', 'XC90', 'V60', 'V90', 'C40', 'S80', 'S70'],
+            'skoda': ['أكتافيا', 'سوبرب', 'كودياك', 'كاروك', 'فابيا', 'رابيد', 'أكتافيا سكوت', 'سيتيجو', 'كاميك', 'أوكتافيا RS']
+        };
         
         // قاعدة بيانات محاكاة للأعطال والحلول
         const errorDatabase = {
@@ -329,28 +517,92 @@
                 causes: ['المحفز الحفاز تالف', 'مشكلة في حساس الأكسجين', 'تسريب في العادم'],
                 solutions: ['فحص واستبدال المحفز الحفاز إذا necessário', 'فحص حساسات الأكسجين', 'فحص نظام العادم للتأكد من عدم وجود تسريب']
             },
+            'P0401': {
+                description: 'تدفق غير كاف في نظام EGR',
+                causes: ['صمام EGR مسدود', 'أنابيب EGR مسدودة', 'مشكلة في التحكم بصمام EGR'],
+                solutions: ['تنظيف أو استبدال صمام EGR', 'فحص وتنظيف أنابيب EGR', 'فحص دائرة التحكم بصمام EGR']
+            },
             
             // أعطال ناقل الحركة
             'P0700': {
                 description: 'خلل في نظام ناقل الحركة',
                 causes: ['低 مستوى زيت ناقل الحركة', 'مشكلة في صمامات ناقل الحركة', 'خلل في وحدة التحكم بناقل الحركة'],
-                solutions: ['فحص مستوى زيت ناقل الحركة', 'فحص صمامات ناقل الحركة', 'فحص وحدة التحكم بناقل الحركة'])
+                solutions: ['فحص مستوى زيت ناقل الحركة', 'فحص صمامات ناقل الحركة', 'فحص وحدة التحكم بناقل الحركة']
+            },
+            'P0715': {
+                description: 'خلل في حساس سرعة دوران عمود الإدخال بناقل الحركة',
+                causes: ['حساس السرعة تالف', 'أسلاك توصيل الحساس تالفة', 'مشكلة في موصل الحساس'],
+                solutions: ['فحص واستبدال حساس السرعة', 'فحص أسلاك التوصيل وإصلاحها', 'فحص وتنظيف موصل الحساس']
             },
             
             // أعطال المكيف
             'AC001': {
                 description: 'ضعف تبريد المكيف',
                 causes: ['نقص في غاز التبريد', 'مشكلة في ضاغط المكيف', 'انسداد في دائرة التبريد'],
-                solutions: ['فحص مستوى غاز التبريد وإعادة الملء إذا necessário', 'فحص ضاغط المكيف', 'تنظيف دائرة التبريد'])
+                solutions: ['فحص مستوى غاز التبريد وإعادة الملء إذا necessário', 'فحص ضاغط المكيف', 'تنظيف دائرة التبريد']
+            },
+            'AC002': {
+                description: 'عدم تبريد المكيف تماماً',
+                causes: ['نقص شديد في غاز التبريد', 'ضاغط المكيف تالف', 'صمام تمدد تالف'],
+                solutions: ['فحص نظام التبريد للتسريب وإصلاحه', 'استبدال ضاغط المكيف', 'استبدال صمام التمدد']
             },
             
             // أعطال الفرامل
             'BR001': {
                 description: 'ضعف في كفاءة الفرامل',
                 causes: ['تآكل في تيل الفرامل', 'نقص في سائل الفرامل', 'تلف في اسطوانات الفرامل'],
-                solutions: ['فحص واستبدال تيل الفرامل', 'فحص وإضافة سائل الفرامل', 'فحص اسطوانات الفرامل'])
+                solutions: ['فحص واستبدال تيل الفرامل', 'فحص وإضافة سائل الفرامل', 'فحص اسطوانات الفرامل']
+            },
+            'BR002': {
+                description: 'اهتزاز في عجلة القيادة عند الفرملة',
+                causes: ['أقراص الفرامل معوجة', 'عدم توازن الإطارات', 'مشكلة في نظام التعليق'],
+                solutions: ['فحص واستبدال أقراص الفرامل', 'موازنة الإطارات', 'فحص نظام التعليق']
+            },
+            
+            // أعطال الكهرباء
+            'EL001': {
+                description: 'ضعف في شحن البطارية',
+                causes: ['مولد التيار (الدينامو) تالف', 'منظم الشحن تالف', 'أسلاك البطارية تالفة'],
+                solutions: ['فحص واستبدال مولد التيار', 'فحص واستبدال منظم الشحن', 'فحص وتنظيف أسلاك البطارية']
+            },
+            'EL002': {
+                description: 'انقطاع التيار الكهربائي عن بعض الأجزاء',
+                causes: ['صمامات كهربائية محروقة', 'أسلاك مقطوعة', 'مشكلة في وحدة التحكم'],
+                solutions: ['فحص واستبدال الصمامات المحروقة', 'فحص الأسلاك وإصلاحها', 'فحص وحدة التحكم']
             }
         };
+        
+        // تحديث قائمة الموديلات عند تغيير نوع السيارة
+        document.getElementById('carType').addEventListener('change', function() {
+            const carType = this.value;
+            const modelSelect = document.getElementById('carModel');
+            
+            modelSelect.innerHTML = '<option value="">اختر الموديل</option>';
+            
+            if (carType && carModels[carType]) {
+                modelSelect.disabled = false;
+                carModels[carType].forEach(model => {
+                    const option = document.createElement('option');
+                    option.value = model;
+                    option.textContent = model;
+                    modelSelect.appendChild(option);
+                });
+            } else {
+                modelSelect.disabled = true;
+            }
+        });
+        
+        // وظيفة تحميل الصورة
+        document.getElementById('imageUpload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('profileImage').src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
         
         // وظيفة تحليل الأعطال
         document.getElementById('analyzeBtn').addEventListener('click', function() {
@@ -430,6 +682,7 @@
                             <li>اتزان العجلات أو الإطارات</li>
                             <li>مشكلة في نظام التعليق</li>
                             <li>مشكلة في أكبال الشد</li>
+                            <li>مشكلة في مفاصل الاتصال (CV Joints)</li>
                         </ul>`;
                         
                         const solutionItem = document.createElement('div');
@@ -439,6 +692,7 @@
                             <li>فحص اتزان العجلات والإطارات</li>
                             <li>فحص نظام التعليق وأجزائه</li>
                             <li>فحص أكبال الشد واستبدالها إذا necessário</li>
+                            <li>فحص مفاصل الاتصال واستبدالها إذا necessário</li>
                         </ul>`;
                         solutionsList.appendChild(solutionItem);
                     }
@@ -449,6 +703,7 @@
                             <li>انسداد في فلتر الهواء أو الوقود</li>
                             <li>مشكلة في حساس تدفق الهواء</li>
                             <li>ضعف في ضغط الوقود</li>
+                            <li>مشكلة في نظام العادم</li>
                         </ul>`;
                         
                         const solutionItem = document.createElement('div');
@@ -458,6 +713,28 @@
                             <li>فحص واستبدال فلتر الهواء</li>
                             <li>فحص حساس تدفق الهواء</li>
                             <li>فحص ضغط الوقود ومضخة الوقود</li>
+                            <li>فحص نظام العادم وخاصة المحفز الحفاز</li>
+                        </ul>`;
+                        solutionsList.appendChild(solutionItem);
+                    }
+                    
+                    if (symptoms.includes('ضجيج') || symptoms.includes('صوت')) {
+                        errorItem.innerHTML += `<p>الأصوات غير الطبيعية قد تكون ناتجة عن:</p>
+                        <ul>
+                            <li>مشكلة في المحرك (صوت طرق)</li>
+                            <li>مشكلة في نظام العادم (صوت تسريب)</li>
+                            <li>مشكلة في نظام التعليق (صوت صرير)</li>
+                            <li>مشكلة في الفرامل (صوت صرير)</li>
+                        </ul>`;
+                        
+                        const solutionItem = document.createElement('div');
+                        solutionItem.className = 'solution-item';
+                        solutionItem.innerHTML = `<strong>الحلول المقترحة:</strong>
+                        <ul>
+                            <li>فحص المحرك وأجزائه الداخلية</li>
+                            <li>فحص نظام العادم للتسريب</li>
+                            <li>فحص نظام التعليق وتزييت الأجزاء</li>
+                            <li>فحص نظام الفرامل واستبدال التيل إذا necessário</li>
                         </ul>`;
                         solutionsList.appendChild(solutionItem);
                     }
