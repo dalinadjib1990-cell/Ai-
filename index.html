@@ -327,6 +327,38 @@
             border-radius: 8px;
             border: 1px solid #555;
         }
+        
+        .tab-container {
+            display: flex;
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--primary);
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background: #3a3a3a;
+            border-radius: 5px 5px 0 0;
+            margin-left: 5px;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .code-search {
+            margin-bottom: 15px;
+        }
     </style>
 </head>
 <body>
@@ -400,35 +432,54 @@
                     <label for="errorCode">أكواد الأعطال (اختياري)</label>
                     <input type="text" id="errorCode" placeholder="أدخل كود العطل مثل P0300 (يفصل بينها بفاصلة)">
                     
-                    <div class="obd-codes-container">
-                        <div class="car-brand">أكواد OBD شائعة:</div>
-                        <div class="code-list">
-                            <div class="code-item" data-code="P0100">P0100</div>
-                            <div class="code-item" data-code="P0200">P0200</div>
-                            <div class="code-item" data-code="P0300">P0300</div>
-                            <div class="code-item" data-code="P0301">P0301</div>
-                            <div class="code-item" data-code="P0400">P0400</div>
-                            <div class="code-item" data-code="P0500">P0500</div>
-                            <div class="code-item" data-code="P0600">P0600</div>
-                            <div class="code-item" data-code="P0700">P0700</div>
-                            <div class="code-item" data-code="P0800">P0800</div>
-                            <div class="code-item" data-code="P0900">P0900</div>
-                            <div class="code-item" data-code="P1000">P1000</div>
-                            <div class="code-item" data-code="P1100">P1100</div>
-                            <div class="code-item" data-code="P1200">P1200</div>
-                            <div class="code-item" data-code="P1300">P1300</div>
-                            <div class="code-item" data-code="P1400">P1400</div>
-                            <div class="code-item" data-code="P1500">P1500</div>
-                            <div class="code-item" data-code="P1600">P1600</div>
-                            <div class="code-item" data-code="P1700">P1700</div>
-                            <div class="code-item" data-code="P1800">P1800</div>
-                            <div class="code-item" data-code="P1900">P1900</div>
-                            <div class="code-item" data-code="P2000">P2000</div>
-                            <div class="code-item" data-code="P2100">P2100</div>
-                            <div class="code-item" data-code="P2200">P2200</div>
-                            <div class="code-item" data-code="P2300">P2300</div>
-                            <div class="code-item" data-code="P2400">P2400</div>
-                            <div class="code-item" data-code="P2500">P2500</div>
+                    <div class="tab-container">
+                        <div class="tab active" data-tab="common">الأكواد الشائعة</div>
+                        <div class="tab" data-tab="all">جميع الأكواد</div>
+                    </div>
+                    
+                    <div class="tab-content active" id="common-codes">
+                        <div class="obd-codes-container">
+                            <div class="code-list">
+                                <div class="code-item" data-code="P0100">P0100</div>
+                                <div class="code-item" data-code="P0200">P0200</div>
+                                <div class="code-item" data-code="P0300">P0300</div>
+                                <div class="code-item" data-code="P0301">P0301</div>
+                                <div class="code-item" data-code="P0400">P0400</div>
+                                <div class="code-item" data-code="P0500">P0500</div>
+                                <div class="code-item" data-code="P0600">P0600</div>
+                                <div class="code-item" data-code="P0700">P0700</div>
+                                <div class="code-item" data-code="P0800">P0800</div>
+                                <div class="code-item" data-code="P0120">P0120</div>
+                                <div class="code-item" data-code="P0130">P0130</div>
+                                <div class="code-item" data-code="P0170">P0170</div>
+                                <div class="code-item" data-code="P0210">P0210</div>
+                                <div class="code-item" data-code="P0230">P0230</div>
+                                <div class="code-item" data-code="P0320">P0320</div>
+                                <div class="code-item" data-code="P0330">P0330</div>
+                                <div class="code-item" data-code="P0340">P0340</div>
+                                <div class="code-item" data-code="P0420">P0420</div>
+                                <div class="code-item" data-code="P0430">P0430</div>
+                                <div class="code-item" data-code="P0440">P0440</div>
+                                <div class="code-item" data-code="P0505">P0505</div>
+                                <div class="code-item" data-code="P0605">P0605</div>
+                                <div class="code-item" data-code="P0705">P0705</div>
+                                <div class="code-item" data-code="P0710">P0710</div>
+                                <div class="code-item" data-code="P0720">P0720</div>
+                                <div class="code-item" data-code="P0730">P0730</div>
+                                <div class="code-item" data-code="P0740">P0740</div>
+                                <div class="code-item" data-code="P0750">P0750</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-content" id="all-codes">
+                        <div class="code-search">
+                            <input type="text" id="codeSearch" placeholder="ابحث عن كود OBD...">
+                        </div>
+                        <div class="obd-codes-container">
+                            <div class="code-list" id="all-codes-list">
+                                <!-- سيتم ملؤها بواسطة JavaScript -->
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -523,19 +574,115 @@
             }
         });
         
-        // إضافة أكواد الأعطال الشائعة
-        document.querySelectorAll('.code-item').forEach(item => {
-            item.addEventListener('click', function() {
-                const code = this.getAttribute('data-code');
-                const currentCode = document.getElementById('errorCode').value;
-                
-                if (currentCode) {
-                    document.getElementById('errorCode').value = currentCode + ', ' + code;
+        // إنشاء جميع أكواد OBD
+        function generateAllOBDCodes() {
+            const codesList = document.getElementById('all-codes-list');
+            codesList.innerHTML = '';
+            
+            // أكواد P0xxx (نظام الطاقة)
+            for (let i = 0; i <= 999; i++) {
+                const code = 'P0' + i.toString().padStart(3, '0');
+                const codeItem = document.createElement('div');
+                codeItem.className = 'code-item';
+                codeItem.textContent = code;
+                codeItem.setAttribute('data-code', code);
+                codesList.appendChild(codeItem);
+            }
+            
+            // أكواد P1xxx (الشركة المصنعة)
+            for (let i = 0; i <= 999; i++) {
+                const code = 'P1' + i.toString().padStart(3, '0');
+                const codeItem = document.createElement('div');
+                codeItem.className = 'code-item';
+                codeItem.textContent = code;
+                codeItem.setAttribute('data-code', code);
+                codesList.appendChild(codeItem);
+            }
+            
+            // أكواد P2xxx (الشركة المصنعة)
+            for (let i = 0; i <= 999; i++) {
+                const code = 'P2' + i.toString().padStart(3, '0');
+                const codeItem = document.createElement('div');
+                codeItem.className = 'code-item';
+                codeItem.textContent = code;
+                codeItem.setAttribute('data-code', code);
+                codesList.appendChild(codeItem);
+            }
+            
+            // أكواد P3xxx (الشركة المصنعة)
+            for (let i = 0; i <= 999; i++) {
+                const code = 'P3' + i.toString().padStart(3, '0');
+                const codeItem = document.createElement('div');
+                codeItem.className = 'code-item';
+                codeItem.textContent = code;
+                codeItem.setAttribute('data-code', code);
+                codesList.appendChild(codeItem);
+            }
+            
+            // إضافة مستمعي الأحداث للأكواد
+            addCodeListeners();
+        }
+        
+        // إضافة مستمعي الأحداث للأكواد
+        function addCodeListeners() {
+            document.querySelectorAll('.code-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const code = this.getAttribute('data-code');
+                    const currentCode = document.getElementById('errorCode').value;
+                    
+                    if (currentCode) {
+                        document.getElementById('errorCode').value = currentCode + ', ' + code;
+                    } else {
+                        document.getElementById('errorCode').value = code;
+                    }
+                });
+            });
+        }
+        
+        // البحث في الأكواد
+        document.getElementById('codeSearch').addEventListener('input', function() {
+            const searchText = this.value.toUpperCase();
+            const codeItems = document.querySelectorAll('#all-codes-list .code-item');
+            
+            codeItems.forEach(item => {
+                const code = item.getAttribute('data-code');
+                if (code.includes(searchText)) {
+                    item.style.display = 'block';
                 } else {
-                    document.getElementById('errorCode').value = code;
+                    item.style.display = 'none';
                 }
             });
         });
+        
+        // تبديل التبويبات
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                // إزالة النشاط من جميع التبويبات
+                document.querySelectorAll('.tab').forEach(t => {
+                    t.classList.remove('active');
+                });
+                
+                // إخفاء جميع محتويات التبويبات
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                
+                // إضافة النشاط للتبويب المحدد
+                this.classList.add('active');
+                
+                // إظهار محتوى التبويب المحدد
+                const tabId = this.getAttribute('data-tab');
+                document.getElementById(tabId + '-codes').classList.add('active');
+                
+                // إذا كان التبويب "جميع الأكواد"، قم بإنشاء الأكواد
+                if (tabId === 'all') {
+                    generateAllOBDCodes();
+                }
+            });
+        });
+        
+        // إضافة أكواد الأعطال الشائعة
+        addCodeListeners();
         
         // قاعدة بيانات محاكاة للأعطال والحلول
         const errorDatabase = {
@@ -580,15 +727,15 @@
                 causes: ['低 مستوى زيت ناقل الحركة', 'مشكلة في صمامات ناقل الحركة', 'خلل في وحدة التحكم بناقل الحركة'],
                 solutions: ['فحص مستوى زيت ناقل الحركة', 'فحص صمامات ناقل الحركة', 'فحص وحدة التحكم بناقل الحركة']
             },
-            'P0800': {
-                description: 'خلل في نظام القابض',
-                causes: ['القابض تالف', 'مشكلة في دواسة القابض', 'مشكلة في وحدة التحكم'],
-                solutions: ['فحص واستبدال القابض', 'فحص دواسة القابض', 'فحص وحدة التحكم']
+            'P0120': {
+                description: 'خلل في دائرة حساس موقع دواسة الوقود / دواسة الفرامل',
+                causes: ['حساس موقع دواسة الوقود تالف', 'مشكلة في دواسة الفرامل', 'أسلاك توصيل تالفة'],
+                solutions: ['فحص واستبدال حساس موقع دواسة الوقود', 'فحص دواسة الفرامل', 'فحص أسلاك التوصيل وإصلاحها']
             },
-            'P0900': {
-                description: 'خلل في نظام التعشيق',
-                causes: ['نظام التعشيق تالف', 'مشكلة في وحدة التحكم', 'مشكلة في التوصيلات'],
-                solutions: ['فحص وإصلاح نظام التعشيق', 'فحص وحدة التحكم', 'فحص التوصيلات وإصلاحها']
+            'P0130': {
+                description: 'خلل في دائرة حساس الأكسجين',
+                causes: ['حساس الأكسجين تالف', 'أسلاك توصيل الحساس تالفة', 'مشكلة في موصل الحساس'],
+                solutions: ['فحص واستبدال حساس الأكسجين', 'فحص أسلاك التوصيل وإصلاحها', 'فحص وتنظيف موصل الحساس']
             }
         };
         
