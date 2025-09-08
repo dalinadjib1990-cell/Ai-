@@ -1,472 +1,738 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Builder — Dali Nadjib AI Voiture (Single-file generator)</title>
-<style>
-  :root{
-    --bg:#05060a; --card:rgba(255,255,255,0.02); --muted:#9aa4b2;
-    --accent1:#ff6b6b; --accent2:#7c5cff; --accent3:#00d4ff; --glass: rgba(255,255,255,0.03);
-    --radius:12px;
-  }
-  *{box-sizing:border-box;font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", Arial;}
-  body{ margin:0; min-height:100vh; background: linear-gradient(180deg,#07101a 0%, #020305 100%); color:#e7f2ff; padding:18px; }
-  .wrap{ max-width:1100px; margin:0 auto; display:grid; grid-template-columns: 1fr 420px; gap:16px; align-items:start; }
-  h1{ margin:0 0 10px 0; font-size:20px; display:flex; gap:8px; align-items:center; }
-  .card{ background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); padding:16px; border-radius:var(--radius); border:1px solid rgba(255,255,255,0.03); }
-  label{ display:block; font-size:13px; color:var(--muted); margin-bottom:6px; }
-  input[type="text"], textarea, select { width:100%; padding:10px; border-radius:10px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.03); color:inherit; }
-  textarea{ min-height:140px; }
-  .btn{ padding:10px 12px; border-radius:10px; background:linear-gradient(90deg,var(--accent2),var(--accent3)); color:#04040a; font-weight:800; border:none; cursor:pointer; }
-  .btn-ghost{ background:transparent; border:1px solid rgba(255,255,255,0.04); color:var(--muted); padding:8px 10px; border-radius:10px; cursor:pointer; }
-  .muted{ color:var(--muted); font-size:13px; }
-  .small{ font-size:12px; color:var(--muted); margin-top:8px; }
-  .file-row{ display:flex; gap:8px; align-items:center; }
-  pre{ background:rgba(0,0,0,0.25); padding:10px; border-radius:8px; color:#dfefff; max-height:220px; overflow:auto; }
-  @media (max-width:980px){ .wrap{ grid-template-columns:1fr; } }
-</style>
-</head>
-<body>
-  <div class="wrap">
-    <main class="card">
-      <h1>مولّد ملف HTML واحد — Dali Nadjib AI Voiture</h1>
-      <div class="muted">اتبع الخطوات التالية لإنشاء ملف HTML واحد يحتوي صورتك وقاعدة الأكواد (مضمّنة Base64/JSON).</div>
-
-      <hr style="border:none;border-top:1px solid rgba(255,255,255,0.03);margin:12px 0;">
-
-      <label>1) رفع صورة البروفايل (تُدمج داخل الملف النهائي)</label>
-      <div class="file-row">
-        <input id="imgFile" type="file" accept="image/*" />
-        <button class="btn-ghost" id="previewImgBtn">معاينة</button>
-      </div>
-      <div id="imgPreview" style="margin-top:8px;"></div>
-
-      <label style="margin-top:12px">2) رفع ملف الأكواد (codes.json) أو لصق JSON هنا</label>
-      <div class="file-row">
-        <input id="codesFile" type="file" accept="application/json" />
-        <button class="btn-ghost" id="loadSampleBtn">تحميل عيّنة صغيرة (عرض)</button>
-      </div>
-      <div style="margin-top:8px;">
-        <textarea id="codesText" placeholder='يمكنك لصق محتوى ملف JSON هنا (مصفوفة من السجلات: [{"code":"P0300","title":"...","description":"...","causes":["..."],"solutions":["..."]}, ...])'></textarea>
-      </div>
-      <div class="small">ملف JSON كامل (كل الأكواد) مطلوب لدمج "جميع الأكواد". إن كان لديك ملف خارجي كبير — ارفعه هنا وسيُدمج داخل الملف النهائي.</div>
-
-      <hr style="border:none;border-top:1px solid rgba(255,255,255,0.03);margin:12px 0;">
-
-      <label>3) إعدادات الملف النهائي</label>
-      <label class="small">اسم التطبيق الظاهر في الملف النهائي</label>
-      <input id="appName" type="text" value="Dali Nadjib AI Voiture" />
-
-      <label class="small" style="margin-top:8px">توضيح صغير يظهر في الأعلى</label>
-      <input id="appTag" type="text" value="واجهة تشخيص OBD بالعربية — ملف واحد شامل" />
-
-      <div style="display:flex;gap:10px;margin-top:12px;">
-        <button class="btn" id="buildBtn">🛠️ إنشاء ملف HTML كامل (Single-file)</button>
-        <button class="btn-ghost" id="downloadCurrentBtn">⬇️ تنزيل النسخة الحالية (مع بيانات الحقل فقط)</button>
-      </div>
-
-      <div style="margin-top:12px;">
-        <div class="small">ملاحظة: إذا كان ملف الأكواد كبيرًا (ميغابايتات عدة)، إنشاء الملف قد يستغرق بعض الوقت — كل التوليد يحدث محليًا في متصفحك.</div>
-      </div>
-
-    </main>
-
-    <aside class="card">
-      <h3>معاينة / دلائل</h3>
-      <div class="small" style="margin-bottom:8px;">حالة الرفع والمعاينة:</div>
-      <div id="statusArea">
-        <div class="muted">لم يتم رفع صورة أو ملف أكواد بعد.</div>
-      </div>
-
-      <hr style="border:none;border-top:1px solid rgba(255,255,255,0.03);margin:12px 0;">
-
-      <h4>تعليمات سريعة</h4>
-      <ol class="small">
-        <li>ارفع صورتك باستخدام زر "اختيار ملف".</li>
-        <li>ارفع ملف `codes.json` الذي يحوي كل الأكواد (إن وجد) أو ألصق JSON في الحقل.</li>
-        <li>اضغط "إنشاء ملف HTML كامل" للحصول على ملف واحد قابل للتنزيل.</li>
-      </ol>
-
-      <hr style="border:none;border-top:1px solid rgba(255,255,255,0.03);margin:12px 0;">
-
-      <h4>ملاحظات تقنية</h4>
-      <div class="small">
-        • كل المعالجة تحدث محليًا في متصفحك — لا شيء يُرسل للخوادم.<br>
-        • إن أردت، أستطيع توليد لك ملف JSON كامل بالأكواد (إن رغبّت) — سأحتاج بعض الوقت لذلك ويكون ضمن رد منفصل.
-      </div>
-    </aside>
-  </div>
-
-<script>
-/* Helper: read file as text/base64 */
-function fileToBase64(file){
-  return new Promise((res, rej)=>{
-    const r = new FileReader();
-    r.onload = ()=> res(r.result);
-    r.onerror = ()=> rej(new Error('فشل قراءة الملف'));
-    r.readAsDataURL(file); // returns data:<mime>;base64,....
-  });
-}
-function fileToText(file){
-  return new Promise((res, rej)=>{
-    const r = new FileReader();
-    r.onload = ()=> res(r.result);
-    r.onerror = ()=> rej(new Error('فشل قراءة الملف'));
-    r.readAsText(file);
-  });
-}
-
-/* UI elements */
-const imgFile = document.getElementById('imgFile');
-const codesFile = document.getElementById('codesFile');
-const codesText = document.getElementById('codesText');
-const previewArea = document.getElementById('imgPreview');
-const statusArea = document.getElementById('statusArea');
-const buildBtn = document.getElementById('buildBtn');
-const downloadCurrentBtn = document.getElementById('downloadCurrentBtn');
-const previewImgBtn = document.getElementById('previewImgBtn');
-const loadSampleBtn = document.getElementById('loadSampleBtn');
-
-let uploadedImageDataUrl = null;
-let uploadedCodesJson = null;
-
-/* preview image */
-previewImgBtn.addEventListener('click', async ()=>{
-  const f = imgFile.files?.[0];
-  if(!f) return alert('اختر صورة أولاً');
-  try{
-    const data = await fileToBase64(f);
-    uploadedImageDataUrl = data;
-    previewArea.innerHTML = `<div style="display:flex;gap:8px;align-items:center">
-      <img src="${data}" alt="معاينة" style="width:96px;height:96px;border-radius:12px;object-fit:cover;border:1px solid rgba(255,255,255,0.04)"/>
-      <div class="muted">تم تحميل الصورة — سيتم تضمينها في الملف النهائي كـ Base64.</div>
-    </div>`;
-    statusArea.innerHTML = `<div class="muted">📸 صورة جاهزة للدمج.</div>`;
-  }catch(e){ alert('فشل قراءة الصورة'); console.error(e); }
-});
-
-/* load sample codes (small) */
-loadSampleBtn.addEventListener('click', ()=>{
-  // small sample JSON to allow user to try the generator
-  const sample = [
-    {"code":"P0300","title":"خلل احتراق عشوائي","description":"احتراق غير منتظم...","causes":["شمعات تالفة","كويلات"],"solutions":["تغيير الشمعات","فحص الكويلات"]},
-    {"code":"P0420","title":"كفاءة المحول منخفضة","description":"انخفاض أداء المحول الحفاز","causes":["محول تالف","حساسات O2"],"solutions":["فحص المحول","استبدال حساس O2"]}
-  ];
-  codesText.value = JSON.stringify(sample, null, 2);
-  statusArea.innerHTML = `<div class="muted">📄 عيّنة صغيرة أضيفت بالنص. لصق ملف JSON كامل سيحل محله.</div>`;
-});
-
-/* upload codes file */
-codesFile.addEventListener('change', async (e)=>{
-  const f = e.target.files?.[0];
-  if(!f) return;
-  try{
-    const txt = await fileToText(f);
-    codesText.value = txt;
-    statusArea.innerHTML = `<div class="muted">📄 تم تحميل ملف الأكواد. يمكنك تعديل النص أو المضي لإنشاء الملف.</div>`;
-  }catch(err){ alert('فشل قراءة ملف الأكواد'); console.error(err); }
-});
-
-/* download helper */
-function downloadBlob(filename, content){
-  const blob = new Blob([content], {type:'text/html;charset=utf-8'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
-  URL.revokeObjectURL(url);
-}
-
-/* Build single-file HTML */
-buildBtn.addEventListener('click', async ()=>{
-  const appName = document.getElementById('appName').value || 'Dali Nadjib AI Voiture';
-  const appTag = document.getElementById('appTag').value || '';
-  // image: if user uploaded but didn't preview, read now
-  try{
-    if(!uploadedImageDataUrl && imgFile.files?.[0]){
-      uploadedImageDataUrl = await fileToBase64(imgFile.files[0]);
-    }
-  }catch(e){ console.warn('no image'); }
-
-  // codes JSON: from textarea
-  const codesRaw = codesText.value && codesText.value.trim();
-  if(!codesRaw){
-    if(!confirm('لم تضع ملف JSON للأكواد داخل الحقل — استمر وسيُنشأ ملف دون قاعدة أكواد (يمكن استيراد لاحقًا)؟')) return;
-  }
-  // validate JSON
-  let codesObj = null;
-  if(codesRaw){
-    try{
-      codesObj = JSON.parse(codesRaw);
-      if(!Array.isArray(codesObj)){
-        if(!confirm('محتوى JSON ليس مصفوفة. هل تريد الاستمرار ومحاولة تضمينه كما هو؟')) {
-          return;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دالي نجيب AI - تشخيص أعطال السيارات</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #8e44ad;
+            --secondary: #f1c40f;
+            --accent: #e67e22;
+            --dark: #1a1a1a;
+            --light: #f8f9fa;
+            --danger: #e74c3c;
+            --success: #2ecc71;
+            --card-bg: #2d2d2d;
+            --header-bg: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
         }
-      }
-    }catch(err){
-      if(!confirm('الـ JSON غير صالح: ' + err.message + '\nهل تريد المتابعة وضم النص كما هو كنص خام؟')) {
-        return;
-      }
-    }
-  }
-
-  statusArea.innerHTML = `<div class="muted">⚙️ جارٍ توليد الملف... (المتصفح المسؤول)</div>`;
-
-  // Build final HTML content (single-file)
-  // The final HTML includes: واجهة كاملة شبيهة بالتي قبل + بيانات الأكواد مدمجة كمتغيّر JS (codesData)
-  // To avoid extremely long inline, we include codes as a JSON string assigned to a JS variable.
-  const imageSnippet = uploadedImageDataUrl ? `<img src="${uploadedImageDataUrl}" alt="logo" style="width:64px;height:64px;border-radius:10px;object-fit:cover;border:1px solid rgba(0,0,0,0.06)"/>` : '';
-
-  // If codesObj is array, we stringify it safely (escape closing script tag)
-  let codesJsonString = '';
-  if(codesObj){
-    codesJsonString = JSON.stringify(codesObj);
-    // escape sequence to prevent </script> in content
-    codesJsonString = codesJsonString.replace(/<\/script>/gi, '<\\/script>');
-  } else {
-    // include empty array placeholder
-    codesJsonString = '[]';
-  }
-
-  // final HTML template (a simplified but full app)
-  const finalHtml = `
-<!doctype html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>${escapeHtml(appName)} — ملف واحد</title>
-<style>
-  :root{ --bg:#05060a; --muted:#9aa4b2; --accent2:#7c5cff; --accent3:#00d4ff; --radius:12px; }
-  body{ margin:0; min-height:100vh; background:linear-gradient(180deg,#07101a 0%, #020305 100%); color:#e7f2ff; font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial; padding:18px; }
-  .wrap{ max-width:1200px; margin:0 auto; display:grid; grid-template-columns: 380px 1fr; gap:16px; align-items:start; }
-  .card{ background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); padding:16px; border-radius:var(--radius); border:1px solid rgba(255,255,255,0.03); }
-  h1{ margin:0; font-size:20px; display:flex; gap:8px; align-items:center; }
-  label{ display:block; font-size:13px; color:var(--muted); margin-top:10px; margin-bottom:6px; }
-  input[type="text"], select, textarea { width:100%; padding:10px; border-radius:10px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.03); color:inherit; }
-  textarea{ min-height:120px; }
-  .btn{ padding:10px 12px; border-radius:10px; background:linear-gradient(90deg,var(--accent2),var(--accent3)); color:#04040a; font-weight:800; border:none; cursor:pointer; }
-  .btn-ghost{ background:transparent; border:1px solid rgba(255,255,255,0.04); color:var(--muted); padding:8px 10px; border-radius:10px; cursor:pointer; }
-  .avatar{ width:72px; height:72px; border-radius:12px; overflow:hidden; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.03); }
-  .muted{ color:var(--muted); font-size:13px; }
-  .resultCard{ padding:14px; border-radius:10px; background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005)); border:1px solid rgba(255,255,255,0.02); }
-  .fault{ border-radius:10px; padding:12px; margin-bottom:10px; background: linear-gradient(90deg, rgba(124,92,255,0.04), rgba(0,212,255,0.02)); border:1px solid rgba(124,92,255,0.06); }
-  pre.analysis{ white-space:pre-wrap; color:#dfeeff; background:rgba(0,0,0,0.18); padding:12px; border-radius:10px; }
-  @media (max-width:980px){ .wrap{ grid-template-columns:1fr; } }
-</style>
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: var(--dark);
+            color: var(--light);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background: var(--header-bg);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            position: relative;
+            border: 1px solid #8e44ad;
+        }
+        
+        .developer-profile {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(142, 68, 173, 0.2);
+            padding: 10px 20px;
+            border-radius: 50px;
+            margin: 15px auto;
+            width: fit-content;
+            backdrop-filter: blur(5px);
+            border: 2px solid var(--primary);
+        }
+        
+        .developer-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--secondary);
+            margin-left: 15px;
+            box-shadow: 0 0 15px rgba(241, 196, 15, 0.5);
+        }
+        
+        .developer-info {
+            color: white;
+            text-align: center;
+        }
+        
+        .developer-info h3 {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+            color: var(--secondary);
+        }
+        
+        .developer-info p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            color: var(--primary);
+            font-weight: bold;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        
+        .logo i {
+            font-size: 2.5rem;
+            margin-left: 10px;
+            color: var(--secondary);
+        }
+        
+        h1 {
+            color: white;
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .subtitle {
+            color: #bbb;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+        
+        .app-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 25px;
+        }
+        
+        @media (min-width: 900px) {
+            .app-container {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        .card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border: 1px solid #444;
+        }
+        
+        .card-title {
+            color: var(--secondary);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary);
+            display: flex;
+            align-items: center;
+            font-size: 1.4rem;
+        }
+        
+        .card-title i {
+            margin-left: 10px;
+            color: var(--accent);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--secondary);
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            background: #3a3a3a;
+            border: 2px solid #555;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+            color: var(--light);
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(142, 68, 173, 0.3);
+        }
+        
+        button {
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+            width: 100%;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(1px);
+        }
+        
+        .result-container {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: #3a3a3a;
+            border-radius: 10px;
+            border-right: 4px solid var(--primary);
+        }
+        
+        .error-title {
+            color: var(--danger);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            font-size: 1.2rem;
+        }
+        
+        .solution-title {
+            color: var(--success);
+            margin-top: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            font-size: 1.2rem;
+        }
+        
+        .error-item, .solution-item {
+            margin-bottom: 10px;
+            padding: 12px;
+            background: #444;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            border-left: 3px solid var(--danger);
+        }
+        
+        .solution-item {
+            border-left: 3px solid var(--success);
+        }
+        
+        .history-item {
+            padding: 15px;
+            margin-bottom: 15px;
+            background: #3a3a3a;
+            border-radius: 8px;
+            border-right: 3px solid var(--primary);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .history-item:hover {
+            background: #444;
+            transform: translateX(-5px);
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            color: #bbb;
+            font-size: 0.9rem;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .loading-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .code-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .code-item {
+            background: linear-gradient(to bottom, var(--primary), #6c3483);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid #8e44ad;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .code-item:hover {
+            background: linear-gradient(to bottom, var(--accent), #d35400);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .car-brand {
+            font-weight: bold;
+            color: var(--secondary);
+            margin-top: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #555;
+        }
+        
+        .obd-codes-container {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 15px;
+            padding: 10px;
+            background: #3a3a3a;
+            border-radius: 8px;
+            border: 1px solid #555;
+        }
+    </style>
 </head>
 <body>
-  <div class="wrap">
-    <aside class="card" aria-labelledby="title">
-      <div style="display:flex;gap:12px;align-items:center;margin-bottom:8px;">
-        <div class="avatar">${imageSnippet || '<div style="color:var(--muted);font-weight:800">D N</div>'}</div>
-        <div style="flex:1">
-          <h1>${escapeHtml(appName)}</h1>
-          <div class="muted">${escapeHtml(appTag)}</div>
+    <div class="container">
+        <header>
+            <div class="developer-profile">
+                <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" alt="صورة المطور" class="developer-img">
+                <div class="developer-info">
+                    <h3>دالي نجيب</h3>
+                    <p>AI Developer</p>
+                </div>
+            </div>
+            
+            <div class="logo">
+                <i class="fas fa-car"></i>
+                <h1>دالي نجيب AI</h1>
+            </div>
+            <p class="subtitle">تشخيص أعطال السيارات باستخدام الذكاء الاصطناعي</p>
+        </header>
+
+        <div class="app-container">
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-info-circle"></i> أدخل معلومات سيارتك</h2>
+                <div class="form-group">
+                    <label for="carType">نوع السيارة</label>
+                    <select id="carType">
+                        <option value="">اختر نوع السيارة</option>
+                        <optgroup label="السيارات الأوروبية">
+                            <option value="peugeot">بيجو</option>
+                            <option value="renault">رينو</option>
+                            <option value="dacia">داسيا</option>
+                            <option value="fiat">فيات</option>
+                            <option value="volkswagen">فولكسفاغن</option>
+                            <option value="bmw">بي إم دبليو</option>
+                            <option value="mercedes">مرسيدس</option>
+                            <option value="audi">أودي</option>
+                        </optgroup>
+                        <optgroup label="السيارات الآسيوية">
+                            <option value="hyundai">هيونداي</option>
+                            <option value="kia">كيا</option>
+                            <option value="toyota">تويوتا</option>
+                            <option value="nissan">نيسان</option>
+                            <option value="honda">هوندا</option>
+                            <option value="mitsubishi">ميتسوبيشي</option>
+                            <option value="chery">شيري</option>
+                            <option value="geely">جيلي</option>
+                        </optgroup>
+                        <optgroup label="السيارات الأمريكية">
+                            <option value="ford">فورد</option>
+                            <option value="chevrolet">شفروليه</option>
+                            <option value="jeep">جيب</option>
+                        </optgroup>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="carModel">الموديل</label>
+                    <select id="carModel">
+                        <option value="">اختر الموديل</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="manufactureYear">سنة التصنيع</label>
+                    <select id="manufactureYear">
+                        <option value="">اختر سنة التصنيع</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="errorCode">أكواد الأعطال (اختياري)</label>
+                    <input type="text" id="errorCode" placeholder="أدخل كود العطل مثل P0300 (يفصل بينها بفاصلة)">
+                    
+                    <div class="obd-codes-container">
+                        <div class="car-brand">أكواد OBD شائعة:</div>
+                        <div class="code-list">
+                            <div class="code-item" data-code="P0100">P0100</div>
+                            <div class="code-item" data-code="P0200">P0200</div>
+                            <div class="code-item" data-code="P0300">P0300</div>
+                            <div class="code-item" data-code="P0301">P0301</div>
+                            <div class="code-item" data-code="P0400">P0400</div>
+                            <div class="code-item" data-code="P0500">P0500</div>
+                            <div class="code-item" data-code="P0600">P0600</div>
+                            <div class="code-item" data-code="P0700">P0700</div>
+                            <div class="code-item" data-code="P0800">P0800</div>
+                            <div class="code-item" data-code="P0900">P0900</div>
+                            <div class="code-item" data-code="P1000">P1000</div>
+                            <div class="code-item" data-code="P1100">P1100</div>
+                            <div class="code-item" data-code="P1200">P1200</div>
+                            <div class="code-item" data-code="P1300">P1300</div>
+                            <div class="code-item" data-code="P1400">P1400</div>
+                            <div class="code-item" data-code="P1500">P1500</div>
+                            <div class="code-item" data-code="P1600">P1600</div>
+                            <div class="code-item" data-code="P1700">P1700</div>
+                            <div class="code-item" data-code="P1800">P1800</div>
+                            <div class="code-item" data-code="P1900">P1900</div>
+                            <div class="code-item" data-code="P2000">P2000</div>
+                            <div class="code-item" data-code="P2100">P2100</div>
+                            <div class="code-item" data-code="P2200">P2200</div>
+                            <div class="code-item" data-code="P2300">P2300</div>
+                            <div class="code-item" data-code="P2400">P2400</div>
+                            <div class="code-item" data-code="P2500">P2500</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="symptoms">الأعراض الملاحظة</label>
+                    <textarea id="symptoms" rows="4" placeholder="صف الأعراض التي تلاحظها في سيارتك..."></textarea>
+                </div>
+                
+                <button id="analyzeBtn"><i class="fas fa-search"></i> تحليل الأعطال</button>
+                
+                <div class="loading" id="loadingIndicator">
+                    <div class="loading-spinner"></div>
+                    <p style="margin-top: 10px;">جاري تحليل البيانات وتشخيص الأعطال...</p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-clipboard-list"></i> نتائج التشخيص</h2>
+                <div id="noResults" style="text-align: center; padding: 30px; color: #777;">
+                    <p>سيظهر هنا نتائج تشخيص أعطال سيارتك بعد إدخال البيانات</p>
+                </div>
+                
+                <div class="result-container" id="resultsContainer">
+                    <h3 class="error-title"><i class="fas fa-exclamation-circle"></i> الأعطال المكتشفة:</h3>
+                    <div id="errorsList"></div>
+                    
+                    <h3 class="solution-title"><i class="fas fa-wrench"></i> الحلول المقترحة:</h3>
+                    <div id="solutionsList"></div>
+                </div>
+                
+                <h2 class="card-title" style="margin-top: 30px;"><i class="fas fa-history"></i> التشخيصات السابقة</h2>
+                <div id="historyList"></div>
+            </div>
         </div>
-      </div>
+        
+        <footer>
+            <p>تطبيق دالي نجيب AI لتشخيص أعطال السيارات - &copy; 2023</p>
+            <p>تم التطوير بواسطة <strong>دالي نجيب</strong> - AI Developer</p>
+        </footer>
+    </div>
 
-      <label>نوع السيارة</label>
-      <select id="brand"><option value="all">عام — غير محدد</option><option>Renault</option><option>Peugeot</option><option>Chery</option><option>Fiat</option><option>Hyundai</option><option>Volkswagen</option><option>BMW</option><option>Other</option></select>
-
-      <label>الموديل</label>
-      <select id="model"><option>عام — غير محدد</option></select>
-
-      <label>سنة الصنع</label>
-      <input id="year" type="text" placeholder="مثال: 2015" />
-
-      <label>كود OBD (اكتب أو اختر)</label>
-      <div style="display:flex;gap:8px;">
-        <input id="codeInput" type="text" placeholder="P0300" />
-        <button class="btn-ghost" id="openList">قائمة الأكواد</button>
-      </div>
-
-      <label>وصف حالة السيارة</label>
-      <textarea id="desc" placeholder="مثال: المحرك يهتز عند التشغيل..."></textarea>
-
-      <div style="display:flex;gap:8px;margin-top:12px;">
-        <button class="btn" id="analyzeBtn">🔎 تشخيص الآن</button>
-        <button class="btn-ghost" id="resetBtn">♻️ مسح</button>
-      </div>
-    </aside>
-
-    <main class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <div><strong>نتائج التشخيص</strong><div class="muted" id="meta">لم يتم إجراء تشخيص بعد</div></div>
-        <div><button class="btn-ghost" id="copyBtn">📋 نسخ</button></div>
-      </div>
-      <div id="output" class="resultCard" style="margin-top:12px;">
-        <div class="muted">اضغط "تشخيص الآن" لبدء التحليل.</div>
-      </div>
-    </main>
-  </div>
-
-<script>
-/* البيانات المضمّنة */
-const CODES_DB = ${codesJsonString};
-
-/* نماذج الموديلات (مبسطة) */
-const MODELS = {
-  "Renault":["Clio","Symbol","Megane","Kangoo","Captur"],
-  "Peugeot":["206","207","208","301","308"],
-  "Chery":["Tiggo 3","Tiggo 7"],
-  "Fiat":["Punto","500"],
-  "Hyundai":["Accent","i10","i20","Elantra"],
-  "Volkswagen":["Golf","Polo"],
-  "BMW":["3 Series","5 Series"],
-  "Other":["موديل آخر"],
-  "all":["عام — غير محدد"]
-};
-
-function fillModelsFor(brand){
-  const sel = document.getElementById('model');
-  sel.innerHTML='';
-  (MODELS[brand]||MODELS['Other']).forEach(m=>{
-    const o = document.createElement('option'); o.value=m; o.textContent=m; sel.appendChild(o);
-  });
-}
-fillModelsFor('all');
-document.getElementById('brand').addEventListener('change', e => fillModelsFor(e.target.value));
-
-/* show code selector modal */
-document.getElementById('openList').addEventListener('click', ()=>{
-  const overlay = document.createElement('div'); overlay.style.position='fixed'; overlay.style.inset=0; overlay.style.background='rgba(0,0,0,0.6)'; overlay.style.display='flex'; overlay.style.alignItems='center'; overlay.style.justifyContent='center'; overlay.style.zIndex=9999;
-  const box = document.createElement('div'); box.style.width='80%'; box.style.maxHeight='80vh'; box.style.overflow='auto'; box.style.background='linear-gradient(180deg,#08101a,#061018)'; box.style.padding='12px'; box.style.borderRadius='10px';
-  const header = document.createElement('div'); header.style.display='flex'; header.style.justifyContent='space-between'; header.style.alignItems='center';
-  const h = document.createElement('strong'); h.textContent='قائمة الأكواد — اختر كودًا';
-  const close = document.createElement('button'); close.className='btn-ghost'; close.textContent='إغلاق'; close.addEventListener('click', ()=> overlay.remove());
-  header.appendChild(h); header.appendChild(close); box.appendChild(header);
-  const search = document.createElement('input'); search.placeholder='ابحث بالكود أو بالكلمة'; search.style.width='100%'; search.style.margin='10px 0'; search.style.padding='8px'; box.appendChild(search);
-  const list = document.createElement('div'); box.appendChild(list);
-
-  function render(q=''){
-    list.innerHTML=''; const qq=(q||'').toLowerCase().trim();
-    const items = CODES_DB.filter(it => {
-      if(!qq) return true;
-      return ((it.code||'') + ' ' + (it.title||'') + ' ' + (it.description||'') + ' ' + (it.causes||[]).join(' ')).toLowerCase().includes(qq);
-    });
-    items.slice(0,1000).forEach(it=>{
-      const row = document.createElement('div'); row.style.padding='8px'; row.style.borderBottom='1px solid rgba(255,255,255,0.02)'; row.style.cursor='pointer';
-      row.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;"><div><strong>'+escapeHtml(it.code||'')+'</strong> <span style="color:var(--muted);margin-left:8px">'+escapeHtml(it.title||'')+'</span></div><div style="color:var(--muted)">'+(it.brands?it.brands.join(' · '):'عام')+'</div></div>';
-      row.addEventListener('click', ()=>{ document.getElementById('codeInput').value = it.code || ''; overlay.remove(); });
-      list.appendChild(row);
-    });
-    if(items.length===0) list.innerHTML='<div class="muted">لا توجد نتائج</div>';
-  }
-  render();
-  search.addEventListener('input', (e)=> render(e.target.value));
-  overlay.appendChild(box); document.body.appendChild(overlay);
-});
-
-/* search helpers */
-function findByCode(code){
-  if(!code) return null;
-  const c = code.toString().trim().toUpperCase();
-  return CODES_DB.filter(it => (it.code||'').toString().toUpperCase() === c);
-}
-function keywordMatch(text){
-  if(!text) return [];
-  const tokens = text.toLowerCase().split(/\\s+/).filter(t=>t.length>2);
-  if(tokens.length===0) return [];
-  return CODES_DB.filter(item=>{
-    const hay = (item.title||'') + ' ' + (item.description||'') + ' ' + (item.causes||[]).join(' ') + ' ' + (item.solutions||[]).join(' ');
-    const low = hay.toLowerCase();
-    return tokens.some(tok => low.includes(tok));
-  });
-}
-
-document.getElementById('analyzeBtn').addEventListener('click', ()=>{
-  const brand = document.getElementById('brand').value || 'all';
-  const model = document.getElementById('model').value || '';
-  const year = document.getElementById('year').value || '';
-  const code = (document.getElementById('codeInput').value || '').trim().toUpperCase();
-  const desc = (document.getElementById('desc').value || '').trim();
-  const out = document.getElementById('output'); out.innerHTML=''; document.getElementById('meta').textContent = 'ماركة: ' + brand + ' · موديل: ' + (model||'—') + ' · سنة: ' + (year||'—') + ' · كود: ' + (code||'—');
-
-  let results = [];
-  if(code){
-    const byCode = findByCode(code);
-    if(byCode.length) results = results.concat(byCode);
-    else {
-      // prefix match
-      const alt = CODES_DB.filter(it => ((it.code||'')+'').toUpperCase().includes(code.replace(/[^A-Z0-9]/g,'')));
-      results = results.concat(alt);
-    }
-  }
-  if(desc){
-    const matched = keywordMatch(desc);
-    matched.forEach(m=>{ if(!results.some(r=>r.code===m.code)) results.push(m); });
-  }
-  if(results.length===0){
-    // fallback: try search code or desc as substring
-    const q = (code || desc).toLowerCase();
-    if(q){
-      const simple = CODES_DB.filter(it => (((it.code||'') + ' ' + (it.title||'') + ' ' + (it.description||'')).toLowerCase().includes(q)));
-      simple.forEach(m=>{ if(!results.some(r=>r.code===m.code)) results.push(m); });
-    }
-  }
-
-  if(results.length===0){
-    out.innerHTML = '<div class="muted">لم نعثر على نتائج — جرّب تغيّر المدخلات أو استيراد JSON أكبر.</div>';
-    return;
-  }
-
-  results.forEach(item=>{
-    const el = document.createElement('div'); el.className='fault';
-    el.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;"><div><div style="color:var(--muted);font-size:13px">الكود</div><div style="font-size:18px;font-weight:800">'+escapeHtml(item.code||'')+'</div></div><div style="text-align:left"><div style="font-size:13px;color:var(--muted)">'+((item.brands && item.brands.length)? item.brands.join(' · ') : 'عام')+'</div><div style="font-weight:800;margin-top:6px">'+escapeHtml(item.title||'')+'</div></div></div><div style="margin-top:10px;color:var(--muted)">'+escapeHtml(item.description||'')+'</div><div style="margin-top:10px"><strong>الأسباب المحتملة:</strong><ul>' + ((item.causes||[]).map(c=>'<li>'+escapeHtml(c)+'</li>').join('')) + '</ul></div><div style="margin-top:6px"><strong>الحلول الممكنة:</strong><ul>' + ((item.solutions||[]).map(s=>'<li>'+escapeHtml(s)+'</li>').join('')) + '</ul></div>';
-    out.appendChild(el);
-  });
-
-  // analysis
-  const systems = Array.from(new Set(results.map(r=>r.system))).join(' · ');
-  const codesList = Array.from(new Set(results.map(r=>r.code))).join(', ');
-  const analysis = 'تحليل عام: بناءً على المدخلات (ماركة: ' + brand + ', موديل: ' + (model||'غير محدد') + ', سنة: ' + (year||'غير محددة') + ') والأكواد/الوصف (' + codesList + ')، المرجح أن تكون المشاكل مرتبطة بالأنظمة: ' + systems + '.\\n\\nالتحقّق الموصى به:\\n1) فحص الوصلات، الفيوزات، مأخذ OBD.\\n2) فحص الشمعات والكويلات والماف والبخاخات.\\n3) مراقبة Live data إن أمكن قبل الاستبدال.\\n\\nملاحظة: توصيات مبدئية — قد يلزم فحص متقدّم لدى فني.';
-
-  const analysisEl = document.createElement('div'); analysisEl.style.marginTop='12px';
-  analysisEl.innerHTML = '<h4 style="margin:0 0 8px 0;">🔎 تحليل مفصّل (بالعربية)</h4><pre class="analysis">'+escapeHtml(analysis)+'</pre>';
-  out.appendChild(analysisEl);
-});
-
-/* copy */
-document.getElementById('copyBtn').addEventListener('click', ()=>{
-  const txt = document.getElementById('output').innerText;
-  navigator.clipboard?.writeText(txt).then(()=> alert('تم نسخ النص ✅')).catch(()=> alert('فشل النسخ — جرب متصفح أحدث'));
-});
-
-/* reset */
-document.getElementById('resetBtn').addEventListener('click', ()=>{
-  document.getElementById('brand').value = 'all';
-  fillModelsFor('all');
-  document.getElementById('year').value = '';
-  document.getElementById('codeInput').value = '';
-  document.getElementById('desc').value = '';
-  document.getElementById('output').innerHTML = '<div class="muted">اضغط "تشخيص الآن" لبدء التحليل.</div>';
-});
-
-/* helper escape */
-function escapeHtml(s){ if(!s) return ''; return s.toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;').replace(/'/g,'&#39;'); }
-
-/* final note: ready */
-</script>
-</body>
-</html>
-`;
-
-  // download file
-  downloadBlob('dali_nadjib_ai_voiture_full.html', finalHtml);
-  statusArea.innerHTML = `<div class="muted">✅ تم إنشاء الملف. سيتم تنزيله تلقائيًا (أو تحقق من التنزيل في متصفحك).</div>`;
-});
-
-/* download current simple template (without codes) */
-downloadCurrentBtn.addEventListener('click', ()=>{
-  const appName = document.getElementById('appName').value || 'Dali Nadjib AI Voiture';
-  const appTag = document.getElementById('appTag').value || '';
-  const sample = '<!doctype html><html><head><meta charset="utf-8"><title>Sample</title></head><body><h1>'+escapeHtml(appName)+'</h1><p>'+escapeHtml(appTag)+'</p></body></html>';
-  downloadBlob('dali_nadjib_ai_voiture_sample.html', sample);
-  statusArea.innerHTML = '<div class="muted">تم تنزيل نسخة بسيطة.</div>';
-});
-
-/* escape helper (used above) */
-function escapeHtml(s){ if(!s) return ''; return s.toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
-</script>
+    <script>
+        // توليد قائمة السنوات من 1980 إلى السنة الحالية
+        const yearSelect = document.getElementById('manufactureYear');
+        const currentYear = new Date().getFullYear();
+        
+        for (let year = currentYear; year >= 1980; year--) {
+            const option = document.createElement('option');
+            option.value = year;
+            option.textContent = year;
+            yearSelect.appendChild(option);
+        }
+        
+        // قاعدة بيانات الموديلات حسب نوع السيارة
+        const carModels = {
+            'peugeot': ['208', '301', '308', '408', '508', '2008', '3008', '5008', 'Partner', 'Expert'],
+            'renault': ['Clio', 'Symbol', 'Megane', 'Talisman', 'Kadjar', 'Captur', 'Koleos', 'Duster', 'Logan', 'Sandero'],
+            'dacia': ['Logan', 'Sandero', 'Duster', 'Lodgy', 'Docker', 'Spring'],
+            'fiat': ['500', 'Panda', 'Tipo', 'Punto', 'Doblo', '500X', '500L', 'Fullback'],
+            'hyundai': ['i10', 'i20', 'i30', 'Elantra', 'Sonata', 'Tucson', 'Santa Fe', 'Kona', 'Creta'],
+            'kia': ['Picanto', 'Rio', 'Cerato', 'Optima', 'Sportage', 'Sorento', 'Stonic', 'Seltos'],
+            'toyota': ['Yaris', 'Corolla', 'Camry', 'RAV4', 'Hilux', 'Land Cruiser', 'Avanza', 'Fortuner'],
+            'nissan': ['Micra', 'Sunny', 'Altima', 'Qashqai', 'X-Trail', 'Patrol', 'Navara', 'Juke'],
+            'chery': ['Tiggo', 'Arrizo', 'QQ', 'Tiggo 2', 'Tiggo 3', 'Tiggo 4', 'Tiggo 5', 'Tiggo 7', 'Tiggo 8'],
+            'ford': ['Fiesta', 'Focus', 'Fusion', 'Mustang', 'Escape', 'Explorer', 'Ranger', 'F-150'],
+            'volkswagen': ['Polo', 'Golf', 'Passat', 'Tiguan', 'Touareg', 'Amarok', 'Caddy', 'Transporter'],
+            'bmw': ['Série 1', 'Série 3', 'Série 5', 'Série 7', 'X1', 'X3', 'X5', 'X6'],
+            'mercedes': ['Classe A', 'Classe B', 'Classe C', 'Classe E', 'Classe S', 'GLA', 'GLC', 'GLE', 'GLS'],
+            'audi': ['A1', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'Q2', 'Q3', 'Q5', 'Q7', 'Q8'],
+            'honda': ['Jazz', 'Civic', 'Accord', 'CR-V', 'HR-V'],
+            'mitsubishi': ['Mirage', 'Lancer', 'Outlander', 'ASX', 'Eclipse Cross', 'Pajero', 'Triton'],
+            'geely': ['Emgrand', 'Coolray', 'Tugella', 'Boyue', 'Geometry C'],
+            'chevrolet': ['Spark', 'Aveo', 'Cruze', 'Malibu', 'Trax', 'Trailblazer', 'Equinox', 'Tahoe'],
+            'jeep': ['Renegade', 'Compass', 'Cherokee', 'Grand Cherokee', 'Wrangler']
+        };
+        
+        // تحديث قائمة الموديلات عند تغيير نوع السيارة
+        document.getElementById('carType').addEventListener('change', function() {
+            const carType = this.value;
+            const modelSelect = document.getElementById('carModel');
+            
+            modelSelect.innerHTML = '<option value="">اختر الموديل</option>';
+            
+            if (carType && carModels[carType]) {
+                carModels[carType].forEach(model => {
+                    const option = document.createElement('option');
+                    option.value = model;
+                    option.textContent = model;
+                    modelSelect.appendChild(option);
+                });
+            }
+        });
+        
+        // إضافة أكواد الأعطال الشائعة
+        document.querySelectorAll('.code-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const code = this.getAttribute('data-code');
+                const currentCode = document.getElementById('errorCode').value;
+                
+                if (currentCode) {
+                    document.getElementById('errorCode').value = currentCode + ', ' + code;
+                } else {
+                    document.getElementById('errorCode').value = code;
+                }
+            });
+        });
+        
+        // قاعدة بيانات محاكاة للأعطال والحلول
+        const errorDatabase = {
+            // أعطال المحرك
+            'P0100': {
+                description: 'خلل في دائرة مقياس تدفق الهواء/حساس تدفق الهواء',
+                causes: ['حساس تدفق الهواء تالف', 'أسلاك توصيل الحساس تالفة', 'مشكلة في موصل الحساس'],
+                solutions: ['فحص واستبدال حساس تدفق الهواء', 'فحص أسلاك التوصيل وإصلاحها', 'فحص وتنظيف موصل الحساس']
+            },
+            'P0200': {
+                description: 'خلل في دائرة حاقن الوقود',
+                causes: ['حاقن الوقود تالف', 'أسلاك توصيل الحاقن تالفة', 'مشكلة في وحدة التحكم'],
+                solutions: ['فحص واستبدال حاقن الوقود', 'فحص أسلاك التوصيل وإصلاحها', 'فحص وحدة التحكم']
+            },
+            'P0300': {
+                description: 'اشتعال غير منتظم في المحرك',
+                causes: ['شمعات الإشعال تالفة', 'أسلاك البواجي تالفة', 'مشكلة في ملف الإشعال', 'ضعف ضغط الوقود'],
+                solutions: ['فحص واستبدال شمعات الإشعال', 'فحص أسلاك البواجي', 'اختبار ملف الإشعال', 'فحص ضغط الوقود']
+            },
+            'P0301': {
+                description: 'اشتعال غير منتظم في الأسطوانة رقم 1',
+                causes: ['شمعة الإشعال في الأسطوانة 1 تالفة', 'خلل في ملف الإشعال للأسطوانة 1', 'مشكلة في حاقن الوقود للأسطوانة 1'],
+                solutions: ['فحص واستبدال شمعة الإشعال في الأسطوانة 1', 'اختبار ملف الإشعال للأسطوانة 1', 'فحص وتنظيف حاقن الوقود للأسطوانة 1']
+            },
+            'P0400': {
+                description: 'خلل في تدفق نظام EGR',
+                causes: ['صمام EGR مسدود', 'أنابيب EGR مسدودة', 'مشكلة في التحكم بصمام EGR'],
+                solutions: ['تنظيف أو استبدال صمام EGR', 'فحص وتنظيف أنابيب EGR', 'فحص دائرة التحكم بصمام EGR']
+            },
+            'P0500': {
+                description: 'خلل في حساس سرعة المركبة',
+                causes: ['حساس سرعة المركبة تالف', 'أسلاك التوصيل تالفة', 'مشكلة في وحدة التحكم'],
+                solutions: ['فحص واستبدال حساس سرعة المركبة', 'فحص أسلاك التوصيل وإصلاحها', 'فحص وحدة التحكم']
+            },
+            'P0600': {
+                description: 'خلل في وحدة التحكم الإلكترونية',
+                causes: ['وحدة التحكم تالفة', 'مشكلة في برمجة الوحدة', 'مشكلة في التوصيلات'],
+                solutions: ['فحص واستبدال وحدة التحكم', 'إعادة برمجة وحدة التحكم', 'فحص التوصيلات وإصلاحها']
+            },
+            'P0700': {
+                description: 'خلل في نظام ناقل الحركة',
+                causes: ['低 مستوى زيت ناقل الحركة', 'مشكلة في صمامات ناقل الحركة', 'خلل في وحدة التحكم بناقل الحركة'],
+                solutions: ['فحص مستوى زيت ناقل الحركة', 'فحص صمامات ناقل الحركة', 'فحص وحدة التحكم بناقل الحركة']
+            },
+            'P0800': {
+                description: 'خلل في نظام القابض',
+                causes: ['القابض تالف', 'مشكلة في دواسة القابض', 'مشكلة في وحدة التحكم'],
+                solutions: ['فحص واستبدال القابض', 'فحص دواسة القابض', 'فحص وحدة التحكم']
+            },
+            'P0900': {
+                description: 'خلل في نظام التعشيق',
+                causes: ['نظام التعشيق تالف', 'مشكلة في وحدة التحكم', 'مشكلة في التوصيلات'],
+                solutions: ['فحص وإصلاح نظام التعشيق', 'فحص وحدة التحكم', 'فحص التوصيلات وإصلاحها']
+            }
+        };
+        
+        // وظيفة تحليل الأعطال
+        document.getElementById('analyzeBtn').addEventListener('click', function() {
+            const carType = document.getElementById('carType').value;
+            const carModel = document.getElementById('carModel').value;
+            const manufactureYear = document.getElementById('manufactureYear').value;
+            const errorCode = document.getElementById('errorCode').value;
+            const symptoms = document.getElementById('symptoms').value;
+            
+            // التحقق من الحقول الإلزامية
+            if (!carType || !carModel || !manufactureYear) {
+                alert('يرجى ملء جميع الحقول الإلزامية: نوع السيارة، الموديل، وسنة التصنيع');
+                return;
+            }
+            
+            // إظهار مؤشر التحميل
+            document.getElementById('loadingIndicator').style.display = 'block';
+            document.getElementById('noResults').style.display = 'none';
+            document.getElementById('resultsContainer').style.display = 'none';
+            
+            // محاكاة عملية التحليل (في تطبيق حقيقي، سيتم التواصل مع الخادم هنا)
+            setTimeout(function() {
+                // إخفاء مؤشر التحميل
+                document.getElementById('loadingIndicator').style.display = 'none';
+                
+                // معالجة أكواد الأعطال
+                const errorCodes = errorCode.split(',').map(code => code.trim().toUpperCase()).filter(code => code);
+                
+                // إنشاء قائمة الأعطال
+                const errorsList = document.getElementById('errorsList');
+                errorsList.innerHTML = '';
+                
+                // إنشاء قائمة الحلول
+                const solutionsList = document.getElementById('solutionsList');
+                solutionsList.innerHTML = '';
+                
+                let foundErrors = false;
+                
+                // إذا كان هناك أكواد أعطال، نبحث عنها في قاعدة البيانات
+                if (errorCodes.length > 0) {
+                    errorCodes.forEach(code => {
+                        if (errorDatabase[code]) {
+                            foundErrors = true;
+                            
+                            // إضافة العطل إلى القائمة
+                            const errorItem = document.createElement('div');
+                            errorItem.className = 'error-item';
+                            errorItem.innerHTML = `<strong>${code}:</strong> ${errorDatabase[code].description}`;
+                            errorsList.appendChild(errorItem);
+                            
+                            // إضافة أسباب العطل
+                            const causesItem = document.createElement('div');
+                            causesItem.innerHTML = `<strong>الأسباب المحتملة:</strong><ul>${errorDatabase[code].causes.map(cause => `<li>${cause}</li>`).join('')}</ul>`;
+                            errorItem.appendChild(causesItem);
+                            
+                            // إضافة الحلول إلى القائمة
+                            const solutionItem = document.createElement('div');
+                            solutionItem.className = 'solution-item';
+                            solutionItem.innerHTML = `<strong>الحلول لـ ${code}:</strong><ul>${errorDatabase[code].solutions.map(solution => `<li>${solution}</li>`).join('')}</ul>`;
+                            solutionsList.appendChild(solutionItem);
+                        }
+                    });
+                }
+                
+                // إذا لم يتم العثور على أعطال من خلال الأكواد، نعرض تحليلًا عامًا بناءً على الأعراض
+                if (!foundErrors && symptoms) {
+                    foundErrors = true;
+                    
+                    // تحليل عام بناءً على الأعراض
+                    const errorItem = document.createElement('div');
+                    errorItem.className = 'error-item';
+                    errorItem.innerHTML = `<strong>تحليل عام بناءً على الأعراض المذكورة:</strong>`;
+                    
+                    if (symptoms.includes('اهتزاز') || symptoms.includes('ارتعاش')) {
+                        errorItem.innerHTML += `<p>الاهتزاز أو الارتعاش قد يكون ناتجًا عن:</p>
+                        <ul>
+                            <li>اتزان العجلات أو الإطارات</li>
+                            <li>مشكلة في نظام التعليق</li>
+                            <li>مشكلة في أكبال الشد</li>
+                        </ul>`;
+                        
+                        const solutionItem = document.createElement('div');
+                        solutionItem.className = 'solution-item';
+                        solutionItem.innerHTML = `<strong>الحلول المقترحة:</strong>
+                        <ul>
+                            <li>فحص اتزان العجلات والإطارات</li>
+                            <li>فحص نظام التعليق وأجزائه</li>
+                            <li>فحص أكبال الشد واستبدالها إذا necessário</li>
+                        </ul>`;
+                        solutionsList.appendChild(solutionItem);
+                    }
+                    
+                    if (symptoms.includes('ضعف') && symptoms.includes('تسارع')) {
+                        errorItem.innerHTML += `<p>ضعف التسارع قد يكون ناتجًا عن:</p>
+                        <ul>
+                            <li>انسداد في فلتر الهواء أو الوقود</li>
+                            <li>مشكلة في حساس تدفق الهواء</li>
+                            <li>ضعف في ضغط الوقود</li>
+                        </ul>`;
+                        
+                        const solutionItem = document.createElement('div');
+                        solutionItem.className = 'solution-item';
+                        solutionItem.innerHTML = `<strong>الحلول المقترحة:</strong>
+                        <ul>
+                            <li>فحص واستبدال فلتر الهواء</li>
+                            <li>فحص حساس تدفق الهواء</li>
+                            <li>فحص ضغط الوقود ومضخة الوقود</li>
+                        </ul>`;
+                        solutionsList.appendChild(solutionItem);
+                    }
+                    
+                    errorsList.appendChild(errorItem);
+                }
+                
+                if (foundErrors) {
+                    document.getElementById('resultsContainer').style.display = 'block';
+                    document.getElementById('noResults').style.display = 'none';
+                    
+                    // إضافة إلى سجل التشخيصات
+                    addToHistory(carType, carModel, manufactureYear, errorCodes);
+                } else {
+                    document.getElementById('noResults').style.display = 'block';
+                    document.getElementById('noResults').innerHTML = '<p>لم يتم العثور على أعطال بناءً على البيانات المدخلة. يرجى التحقق من صحة البيانات أو إدخال المزيد من التفاصيل.</p>';
+                }
+            }, 2000); // محاكاة وقت الانتظار للتحليل
+        });
+        
+        // إضافة التشخيص إلى السجل
+        function addToHistory(carType, carModel, year, errorCodes) {
+            const historyList = document.getElementById('historyList');
+            const historyItem = document.createElement('div');
+            historyItem.className = 'history-item';
+            
+            const date = new Date().toLocaleDateString('ar-EG');
+            historyItem.innerHTML = `
+                <strong>${carModel} - ${carType} (${year})</strong>
+                <p>تاريخ التشخيص: ${date}</p>
+                <p>الأكواد المدخلة: ${errorCodes.join(', ') || 'لا توجد أكواد'}</p>
+            `;
+            
+            historyList.insertBefore(historyItem, historyList.firstChild);
+        }
+    </script>
 </body>
 </html>
