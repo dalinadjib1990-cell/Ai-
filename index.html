@@ -359,6 +359,18 @@
         .code-search {
             margin-bottom: 15px;
         }
+        
+        .code-category {
+            margin-bottom: 15px;
+        }
+        
+        .code-category-title {
+            font-weight: bold;
+            color: var(--secondary);
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #555;
+        }
     </style>
 </head>
 <body>
@@ -448,7 +460,6 @@
                                 <div class="code-item" data-code="P0500">P0500</div>
                                 <div class="code-item" data-code="P0600">P0600</div>
                                 <div class="code-item" data-code="P0700">P0700</div>
-                                <div class="code-item" data-code="P0800">P0800</div>
                                 <div class="code-item" data-code="P0120">P0120</div>
                                 <div class="code-item" data-code="P0130">P0130</div>
                                 <div class="code-item" data-code="P0170">P0170</div>
@@ -477,7 +488,7 @@
                             <input type="text" id="codeSearch" placeholder="ابحث عن كود OBD...">
                         </div>
                         <div class="obd-codes-container">
-                            <div class="code-list" id="all-codes-list">
+                            <div id="all-codes-list">
                                 <!-- سيتم ملؤها بواسطة JavaScript -->
                             </div>
                         </div>
@@ -580,44 +591,80 @@
             codesList.innerHTML = '';
             
             // أكواد P0xxx (نظام الطاقة)
+            const p0Category = document.createElement('div');
+            p0Category.className = 'code-category';
+            p0Category.innerHTML = '<div class="code-category-title">أكواد P0xxx (نظام الطاقة)</div>';
+            const p0List = document.createElement('div');
+            p0List.className = 'code-list';
+            
             for (let i = 0; i <= 999; i++) {
                 const code = 'P0' + i.toString().padStart(3, '0');
                 const codeItem = document.createElement('div');
                 codeItem.className = 'code-item';
                 codeItem.textContent = code;
                 codeItem.setAttribute('data-code', code);
-                codesList.appendChild(codeItem);
+                p0List.appendChild(codeItem);
             }
             
+            p0Category.appendChild(p0List);
+            codesList.appendChild(p0Category);
+            
             // أكواد P1xxx (الشركة المصنعة)
+            const p1Category = document.createElement('div');
+            p1Category.className = 'code-category';
+            p1Category.innerHTML = '<div class="code-category-title">أكواد P1xxx (الشركة المصنعة)</div>';
+            const p1List = document.createElement('div');
+            p1List.className = 'code-list';
+            
             for (let i = 0; i <= 999; i++) {
                 const code = 'P1' + i.toString().padStart(3, '0');
                 const codeItem = document.createElement('div');
                 codeItem.className = 'code-item';
                 codeItem.textContent = code;
                 codeItem.setAttribute('data-code', code);
-                codesList.appendChild(codeItem);
+                p1List.appendChild(codeItem);
             }
             
+            p1Category.appendChild(p1List);
+            codesList.appendChild(p1Category);
+            
             // أكواد P2xxx (الشركة المصنعة)
+            const p2Category = document.createElement('div');
+            p2Category.className = 'code-category';
+            p2Category.innerHTML = '<div class="code-category-title">أكواد P2xxx (الشركة المصنعة)</div>';
+            const p2List = document.createElement('div');
+            p2List.className = 'code-list';
+            
             for (let i = 0; i <= 999; i++) {
                 const code = 'P2' + i.toString().padStart(3, '0');
                 const codeItem = document.createElement('div');
                 codeItem.className = 'code-item';
                 codeItem.textContent = code;
                 codeItem.setAttribute('data-code', code);
-                codesList.appendChild(codeItem);
+                p2List.appendChild(codeItem);
             }
             
+            p2Category.appendChild(p2List);
+            codesList.appendChild(p2Category);
+            
             // أكواد P3xxx (الشركة المصنعة)
+            const p3Category = document.createElement('div');
+            p3Category.className = 'code-category';
+            p3Category.innerHTML = '<div class="code-category-title">أكواد P3xxx (الشركة المصنعة)</div>';
+            const p3List = document.createElement('div');
+            p3List.className = 'code-list';
+            
             for (let i = 0; i <= 999; i++) {
                 const code = 'P3' + i.toString().padStart(3, '0');
                 const codeItem = document.createElement('div');
                 codeItem.className = 'code-item';
                 codeItem.textContent = code;
                 codeItem.setAttribute('data-code', code);
-                codesList.appendChild(codeItem);
+                p3List.appendChild(codeItem);
             }
+            
+            p3Category.appendChild(p3List);
+            codesList.appendChild(p3Category);
             
             // إضافة مستمعي الأحداث للأكواد
             addCodeListeners();
@@ -648,6 +695,7 @@
                 const code = item.getAttribute('data-code');
                 if (code.includes(searchText)) {
                     item.style.display = 'block';
+                    item.parentElement.parentElement.style.display = 'block';
                 } else {
                     item.style.display = 'none';
                 }
