@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Dali - تشخيص أعطال السيارات</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap');
+        
+        :root {
+            --primary-blue: #1E40AF;
+            --secondary-blue: #3B82F6;
+            --accent-orange: #F59E0B;
+            --success-green: #10B981;
+            --warning-red: #EF4444;
+            --dark-bg: #0F172A;
+            --card-bg: #1E293B;
+        }
+        
+        * {
+            font-family: 'Cairo', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #334155 100%);
+            min-height: 100vh;
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(45deg, var(--primary-blue), var(--accent-orange));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, var(--primary-blue), var(--secondary-blue));
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(30, 64, 175, 0.3);
+        }
+        
+        .btn-orange {
+            background: linear-gradient(45deg, var(--accent-orange), #F97316);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-orange:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(245, 158, 11, 0.3);
+        }
+        
+        .diagnostic-card {
+            transition: all 0.3s ease;
+        }
+        
+        .diagnostic-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.2);
+        }
+        
+        .obd-code {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            color: var(--accent-orange);
+        }
+        
+        .severity-low { border-left: 4px solid var(--success-green); }
+        .severity-medium { border-left: 4px solid var(--accent-orange); }
+        .severity-high { border-left: 4px solid var(--warning-red); }
+        
+        .loading-spinner {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        input, select, textarea {
+            font-size: 16px !important;
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+        
+        .modal-content {
+            background: var(--card-bg);
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+    </style>
+</head>
+<body class="min-h-screen text-white">
+    <!-- Header -->
+    <header class="glass-effect border-b border-blue-500/30 p-4">
+        <div class="container mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-4 rtl:space-x-reverse">
+                <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-orange-500 rounded-full flex items-center justify-center">
+                    <i class="fas fa-car-crash text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold gradient-text">AI Dali - تشخيص أعطال السيارات</h1>
+                    <p class="text-sm text-blue-300">نظام تشخيص ذكي باستخدام أكواد OBD</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4 rtl:space-x-reverse">
+                <div class="text-center">
+                    <div class="text-lg font-bold text-orange-400" id="diagnosisCount">0</div>
+                    <div class="text-xs text-gray-400">تشخيص اليوم</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto p-4 space-y-6">
+        <!-- Car Information Section -->
+        <section class="glass-effect rounded-xl p-6 fade-in">
+            <h2 class="text-2xl font-bold text-blue-300 mb-6 flex items-center">
+                <i class="fas fa-car mr-3"></i>
+                معلومات السيارة
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2">نوع السيارة</label>
+                    <select id="carBrand" class="w-full p-3 bg-gray-800/50 border border-blue-500/30 rounded-lg text-base">
+                        <option value="">اختر النوع</option>
+                        <option value="toyota">تويوتا</option>
+                        <option value="nissan">نيسان</option>
+                        <option value="hyundai">هيونداي</option>
+                        <option value="kia">كيا</option>
+                        <option value="mercedes">مرسيدس</option>
+                        <option value="bmw">بي ام دبليو</option>
+                        <option value="audi">أودي</option>
+                        <option value="volkswagen">فولكس واجن</option>
+                        <option value="ford">فورد</option>
+                        <option value="chevrolet">شيفروليه</option>
+                        <option value="honda">هوندا</option>
+                        <option value="mazda">مازدا</option>
+                        <option value="mitsubishi">ميتسوبيشي</option>
+                        <option value="peugeot">بيجو</option>
+                        <option value="renault">رينو</option>
+                        <option value="other">أخرى</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">الموديل</label>
+                    <input type="text" id="carModel" class="w-full p-3 bg-gray-800/50 border border-blue-500/30 rounded-lg text-base" placeholder="مثل: كامري، التيما">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">سنة الصنع</label>
+                    <input type="number" id="carYear" class="w-full p-3 bg-gray-800/50 border border-blue-500/30 rounded-lg text-base" min="1990" max="2024" placeholder="2020">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">المحرك</label>
+                    <select id="engineType" class="w-full p-3 bg-gray-800/50 border border-blue-500/30 rounded-lg text-base">
+                        <option value="">اختر نوع المحرك</option>
+                        <option value="gasoline">بنزين</option>
+                        <option value="diesel">ديزل</option>
+                        <option value="hybrid">هجين</option>
+                        <option value="electric">كهربائي</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <!-- OBD Code Input Section -->
+        <section class="glass-effect rounded-xl p-6 fade-in">
+            <h2 class="text-2xl font-bold text-blue-300 mb-6 flex items-center">
+                <i class="fas fa-code mr-3"></i>
+                إدخال كود OBD
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium mb-2">كود العطل (OBD Code)</label>
+                    <input type="text" id="obdCode" class="w-full p-3 bg-gray-800/50 border border-blue-500/30 rounded-lg text-base obd-code" 
+                           placeholder="مثل: P0300, P0420, P0171" 
+                           style="text-transform: uppercase;">
+                    <p class="text-xs text-gray-400 mt-1">أدخل الكود كما يظهر في جهاز التشخيص (مثل: P0300)</p>
+                </div>
+                <div class="flex items-end">
+                    <button id="diagnoseBtn" class="btn-primary w-full px-6 py-3 rounded-lg text-white font-semibold">
+                        <i class="fas fa-search mr-2"></i>
+                        تشخيص العطل
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Quick Code Buttons -->
+            <div class="mt-4">
+                <h3 class="text-sm font-medium mb-3 text-gray-300">أكواد شائعة:</h3>
+                <div class="flex flex-wrap gap-2">
+                    <button class="quick-code-btn px-3 py-1 bg-blue-600/20 text-blue-300 rounded-full text-sm hover:bg-blue-600/40 transition-all" data-code="P0300">P0300</button>
+                    <button class="quick-code-btn px-3 py-1 bg-blue-600/20 text-blue-300 rounded-full text-sm hover:bg-blue-600/40 transition-all" data-code="P0420">P0420</button>
+                    <button class="quick-code-btn px-3 py-1 bg-blue-600/20 text-blue-300 rounded-full text-sm hover:bg-blue-600/40 transition-all" data-code="P0171">P0171</button>
+                    <button class="quick-code-btn px-3 py-1 bg-blue-600/20 text-blue-300 rounded-full text-sm hover:bg-blue-600/40 transition-all" data-code="P0302">P0302</button>
+                    <button class="quick-code-btn px-3 py-1 bg-blue-600/20 text-blue-300 rounded-full text-sm hover:bg-blue-600/40 transition-all" data-code="P0443">P0443</button>
+                    <button class="quick-code-btn px-3 py-1 bg-blue-600/20 text-blue-300 rounded-full text-sm hover:bg-blue-600/40 transition-all" data-code="P0128">P0128</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Loading Section -->
+        <section id="loadingSection" class="glass-effect rounded-xl p-6 hidden">
+            <div class="text-center">
+                <div class="loading-spinner w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+                <h3 class="text-lg font-semibold text-blue-300 mb-2">جاري تشخيص العطل...</h3>
+                <p class="text-gray-400" id="loadingText">تحليل الكود وإعداد التقرير</p>
+            </div>
+        </section>
+
+        <!-- Diagnosis Results Section -->
+        <section id="resultsSection" class="glass-effect rounded-xl p-6 hidden fade-in">
+            <h2 class="text-2xl font-bold text-blue-300 mb-6 flex items-center">
+                <i class="fas fa-clipboard-check mr-3"></i>
+                نتائج التشخيص
+            </h2>
+            <div id="diagnosisResults">
+                <!-- Results will be populated here -->
+            </div>
+        </section>
+
+        <!-- AI Analysis Section -->
+        <section id="aiAnalysisSection" class="glass-effect rounded-xl p-6 hidden fade-in">
+            <h2 class="text-2xl font-bold text-orange-300 mb-4 flex items-center">
+                <i class="fas fa-robot mr-3"></i>
+                تحليل الذكاء الاصطناعي
+            </h2>
+            <div class="mb-4 flex space-x-4 rtl:space-x-reverse">
+                <button id="getAiAnalysisBtn" class="btn-orange px-4 py-2 rounded-lg text-white font-semibold">
+                    <i class="fas fa-brain mr-2"></i>
+                    تحليل متقدم بالذكاء الاصطناعي
+                </button>
+            </div>
+            <div id="aiAnalysisResults" class="hidden">
+                <!-- AI Analysis will be populated here -->
+            </div>
+        </section>
+
+        <!-- History Section -->
+        <section class="glass-effect rounded-xl p-6 fade-in">
+            <h2 class="text-2xl font-bold text-blue-300 mb-4 flex items-center">
+                <i class="fas fa-history mr-3"></i>
+                سجل التشخيصات
+            </h2>
+            <div id="historyList" class="space-y-3">
+                <p class="text-gray-400 text-center">لا توجد تشخيصات سابقة</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal for detailed diagnosis -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-blue-300">تفاصيل العطل</h3>
+                <button id="closeModal" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+            </div>
+            <div id="modalContent">
+                <!-- Modal content will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let diagnosisHistory = JSON.parse(localStorage.getItem('diagnosisHistory') || '[]');
+        let currentDiagnosis = null;
+
+        // OBD Codes Database
+        const obdDatabase = {
+            'P0300': {
+                title: 'عدم انتظام الاشتعال العشوائي/متعدد الأسطوانات',
+                description: 'يشير هذا الكود إلى أن وحدة التحكم في المحرك (ECM) اكتشفت عدم انتظام في الاشتعال في أسطوانة أو أكثر من المحرك.',
+                severity: 'high',
+                causes: [
+                    'شمعات الإشعال التالفة أو المتسخة',
+                    'أسلاك الإشعال التالفة',
+                    'ملف الإشعال المعطل',
+                    'حاقنات الوقود المسدودة',
+                    'مشاكل في ضغط المحرك',
+                    'تسرب في الفاكيوم',
+                    'مشاكل في نظام الوقود'
+                ],
+                solutions: [
+                    'فحص واستبدال شمعات الإشعال إذا لزم الأمر',
+                    'فحص أسلاك وملفات الإشعال',
+                    'تنظيف أو استبدال حاقنات الوقود',
+                    'فحص ضغط الأسطوانات',
+                    'البحث عن تسريبات الفاكيوم وإصلاحها'
+                ],
+                estimatedCost: '200 - 800 ريال'
+            },
+            'P0420': {
+                title: 'كفاءة المحفز أقل من العتبة المطلوبة',
+                description: 'يشير هذا الكود إلى أن المحفز الحفزي (الكتلايزر) لا يعمل بكفاءة مثلى في تحويل الغازات الضارة.',
+                severity: 'medium',
+                causes: [
+                    'المحفز الحفزي التالف',
+                    'حساس الأوكسجين المعطل',
+                    'تسرب في نظام العادم',
+                    'مشاكل في نظام الوقود',
+                    'المحرك يحرق الزيت'
+                ],
+                solutions: [
+                    'استبدال المحفز الحفزي',
+                    'فحص واستبدال حساس الأوكسجين',
+                    'إصلاح تسريبات العادم',
+                    'فحص وتعديل خليط الهواء والوقود',
+                    'استخدام منظفات المحفز الحفزي'
+                ],
+                estimatedCost: '800 - 2500 ريال'
+            },
+            'P0171': {
+                title: 'خليط الوقود فقير (بنك 1)',
+                description: 'يشير هذا الكود إلى أن وحدة التحكم في المحرك اكتشفت أن خليط الهواء والوقود فقير جداً.',
+                severity: 'medium',
+                causes: [
+                    'تسرب في نظام السحب',
+                    'فلتر الهواء المتسخ',
+                    'حساس تدفق الهواء المعطل',
+                    'حاقنات الوقود المسدودة',
+                    'مضخة الوقود الضعيفة',
+                    'تسرب في خط الوقود'
+                ],
+                solutions: [
+                    'فحص وإصلاح تسريبات السحب',
+                    'استبدال فلتر الهواء',
+                    'تنظيف أو استبدال حساس تدفق الهواء',
+                    'تنظيف حاقنات الوقود',
+                    'فحص ضغط مضخة الوقود'
+                ],
+                estimatedCost: '150 - 600 ريال'
+            },
+            'P0302': {
+                title: 'عدم انتظام الاشتعال في الأسطوانة رقم 2',
+                description: 'يشير هذا الكود إلى وجود عدم انتظام في الاشتعال في الأسطوانة رقم 2 تحديداً.',
+                severity: 'high',
+                causes: [
+                    'شمعة الإشعال في الأسطوانة 2 تالفة',
+                    'ملف الإشعال المخصص للأسطوانة 2 معطل',
+                    'سلك الإشعال التالف',
+                    'مشكلة في حاقن الوقود للأسطوانة 2',
+                    'انخفاض ضغط الأسطوانة'
+                ],
+                solutions: [
+                    'استبدال شمعة الإشعال للأسطوانة 2',
+                    'فحص واستبدال ملف الإشعال',
+                    'استبدال سلك الإشعال إذا لزم الأمر',
+                    'فحص حاقن الوقود للأسطوانة 2',
+                    'فحص ضغط الأسطوانة'
+                ],
+                estimatedCost: '100 - 500 ريال'
+            },
+            'P0443': {
+                title: 'دائرة صمام تنفيس خزان الوقود',
+                description: 'يشير هذا الكود إلى وجود مشكلة في دائرة صمام تنفيس نظام استرداد أبخرة الوقود.',
+                severity: 'low',
+                causes: [
+                    'صمام التنفيس التالف',
+                    'مشكلة في الأسلاك',
+                    'وحدة التحكم في المحرك معطلة',
+                    'تسرب في نظام EVAP'
+                ],
+                solutions: [
+                    'استبدال صمام التنفيس',
+                    'فحص وإصلاح الأسلاك التالفة',
+                    'فحص نظام EVAP بالكامل',
+                    'إعادة تعيين الكود'
+                ],
+                estimatedCost: '200 - 400 ريال'
+            },
+            'P0128': {
+                title: 'المبرد لا يصل إلى درجة الحرارة المطلوبة',
+                description: 'يشير هذا الكود إلى أن المحرك لا يصل إلى درجة حرارة التشغيل العادية في الوقت المحدد.',
+                severity: 'medium',
+                causes: [
+                    'الترموستات معلق في الوضع المفتوح',
+                    'حساس درجة حرارة المبرد معطل',
+                    'انخفاض مستوى المبرد',
+                    'مشكلة في نظام التبريد'
+                ],
+                solutions: [
+                    'استبدال الترموستات',
+                    'فحص واستبدال حساس درجة الحرارة',
+                    'فحص مستوى وحالة المبرد',
+                    'فحص نظام التبريد بالكامل'
+                ],
+                estimatedCost: '150 - 500 ريال'
+            }
+        };
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEventListeners();
+            updateDiagnosisCount();
+            loadHistory();
+        });
+
+        function setupEventListeners() {
+            document.getElementById('diagnoseBtn').addEventListener('click', diagnoseFault);
+            document.getElementById('getAiAnalysisBtn').addEventListener('click', getAiAnalysis);
+            document.getElementById('closeModal').addEventListener('click', closeModal);
+            document.getElementById('obdCode').addEventListener('input', formatObdCode);
+            
+            // Quick code buttons
+            document.querySelectorAll('.quick-code-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.getElementById('obdCode').value = this.dataset.code;
+                });
+            });
+
+            // Window click to close modal
+            window.addEventListener('click', function(event) {
+                if (event.target === document.getElementById('detailModal')) {
+                    closeModal();
+                }
+            });
+        }
+
+        function formatObdCode(event) {
+            event.target.value = event.target.value.toUpperCase();
+        }
+
+        function diagnoseFault() {
+            const obdCode = document.getElementById('obdCode').value.trim();
+            
+            if (!obdCode) {
+                showNotification('يرجى إدخال كود OBD', 'error');
+                return;
+            }
+
+            if (!isValidObdCode(obdCode)) {
+                showNotification('تنسيق الكود غير صحيح. يجب أن يبدأ بحرف متبوع بأربعة أرقام', 'error');
+                return;
+            }
+
+            showLoadingScreen();
+            
+            setTimeout(() => {
+                performDiagnosis(obdCode);
+            }, 2000);
+        }
+
+        function isValidObdCode(code) {
+            // Basic OBD code validation (letter followed by 4 digits)
+            return /^[PBCU]\d{4}$/.test(code);
+        }
+
+        function showLoadingScreen() {
+            document.getElementById('loadingSection').classList.remove('hidden');
+            document.getElementById('resultsSection').classList.add('hidden');
+            document.getElementById('aiAnalysisSection').classList.add('hidden');
+            
+            const loadingTexts = [
+                'تحليل الكود...',
+                'البحث في قاعدة البيانات...',
+                'إعداد التشخيص...',
+                'تحضير النتائج...'
+            ];
+            
+            let index = 0;
+            const loadingInterval = setInterval(() => {
+                document.getElementById('loadingText').textContent = loadingTexts[index];
+                index = (index + 1) % loadingTexts.length;
+            }, 500);
+
+            setTimeout(() => {
+                clearInterval(loadingInterval);
+            }, 2000);
+        }
+
+        function performDiagnosis(obdCode) {
+            const carBrand = document.getElementById('carBrand').value;
+            const carModel = document.getElementById('carModel').value;
+            const carYear = document.getElementById('carYear').value;
+            const engineType = document.getElementById('engineType').value;
+
+            let diagnosis = obdDatabase[obdCode];
+            
+            if (!diagnosis) {
+                diagnosis = {
+                    title: 'كود غير معروف في قاعدة البيانات',
+                    description: 'هذا الكود غير موجود في قاعدة البيانات الحالية. يُنصح بمراجعة فني متخصص.',
+                    severity: 'medium',
+                    causes: ['كود غير مدرج في النظام'],
+                    solutions: ['مراجعة فني متخصص', 'البحث في دليل السيارة'],
+                    estimatedCost: 'غير محدد'
+                };
+            }
+
+            currentDiagnosis = {
+                obdCode,
+                carBrand,
+                carModel,
+                carYear,
+                engineType,
+                diagnosis,
+                timestamp: new Date().toISOString()
+            };
+
+            displayDiagnosisResults(currentDiagnosis);
+            addToHistory(currentDiagnosis);
+            updateDiagnosisCount();
+            
+            document.getElementById('loadingSection').classList.add('hidden');
+            document.getElementById('resultsSection').classList.remove('hidden');
+            document.getElementById('aiAnalysisSection').classList.remove('hidden');
+        }
+
+        function displayDiagnosisResults(diagnosisData) {
+            const { obdCode, carBrand, carModel, carYear, diagnosis } = diagnosisData;
+            
+            const severityColors = {
+                low: 'text-green-400 bg-green-900/20',
+                medium: 'text-yellow-400 bg-yellow-900/20',
+                high: 'text-red-400 bg-red-900/20'
+            };
+
+            const severityTexts = {
+                low: 'منخفضة',
+                medium: 'متوسطة',
+                high: 'عالية'
+            };
+
+            const resultsHtml = `
+                <div class="diagnostic-card bg-gray-800/30 rounded-lg p-6 severity-${diagnosis.severity}">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="text-xl font-bold text-white mb-2">${diagnosis.title}</h3>
+                            <p class="obd-code text-2xl mb-2">${obdCode}</p>
+                            <div class="flex items-center space-x-2 rtl:space-x-reverse">
+                                <span class="px-3 py-1 rounded-full text-sm ${severityColors[diagnosis.severity]}">
+                                    ${severityTexts[diagnosis.severity]}
+                                </span>
+                                <span class="text-gray-400">${carBrand} ${carModel} ${carYear}</span>
+                            </div>
+                        </div>
+                        <button onclick="showDetailModal()" class="btn-primary px-4 py-2 rounded-lg">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            تفاصيل
+                        </button>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h4 class="font-semibold text-blue-300 mb-2">الوصف:</h4>
+                        <p class="text-gray-300">${diagnosis.description}</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <h4 class="font-semibold text-orange-300 mb-2">الأسباب المحتملة:</h4>
+                            <ul class="list-disc list-inside text-gray-300 space-y-1">
+                                ${diagnosis.causes.map(cause => `<li>${cause}</li>`).join('')}
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-green-300 mb-2">الحلول المقترحة:</h4>
+                            <ul class="list-disc list-inside text-gray-300 space-y-1">
+                                ${diagnosis.solutions.map(solution => `<li>${solution}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 p-3 bg-blue-900/20 rounded-lg">
+                        <h4 class="font-semibold text-blue-300 mb-1">التكلفة المتوقعة:</h4>
+                        <p class="text-white font-bold">${diagnosis.estimatedCost}</p>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('diagnosisResults').innerHTML = resultsHtml;
+        }
+
+        function showDetailModal() {
+            if (!currentDiagnosis) return;
+
+            const { diagnosis } = currentDiagnosis;
+            
+            const modalHtml = `
+                <div class="space-y-4">
+                    <div>
+                        <h4 class="font-semibold text-blue-300 mb-2">معلومات تفصيلية:</h4>
+                        <p class="text-gray-300">${diagnosis.description}</p>
+                    </div>
+                    
+                    <div>
+                        <h4 class="font-semibold text-orange-300 mb-2">خطوات التشخيص:</h4>
+                        <ol class="list-decimal list-inside text-gray-300 space-y-2">
+                            <li>فحص الكود باستخدام جهاز OBD</li>
+                            <li>فحص الأسباب المحتملة بالترتيب</li>
+                            <li>اختبار المكونات المشتبه بها</li>
+                            <li>إصلاح أو استبدال القطع التالفة</li>
+                            <li>مسح الكود وإجراء اختبار طريق</li>
+                        </ol>
+                    </div>
+                    
+                    <div>
+                        <h4 class="font-semibold text-red-300 mb-2">تحذيرات:</h4>
+                        <div class="bg-red-900/20 p-3 rounded-lg">
+                            <p class="text-red-300">
+                                ${diagnosis.severity === 'high' ? 
+                                    'هذا العطل خطير ويجب إصلاحه فوراً لتجنب أضرار أكبر للمحرك.' :
+                                    diagnosis.severity === 'medium' ?
+                                    'يُنصح بإصلاح هذا العطل في أقرب وقت ممكن.' :
+                                    'هذا العطل لا يؤثر على سلامة القيادة لكن يُنصح بإصلاحه.'
+                                }
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('modalContent').innerHTML = modalHtml;
+            document.getElementById('detailModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('detailModal').style.display = 'none';
+        }
+
+        async function getAiAnalysis() {
+            if (!currentDiagnosis) {
+                showNotification('يجب إجراء تشخيص أولاً', 'error');
+                return;
+            }
+
+            document.getElementById('getAiAnalysisBtn').innerHTML = `
+                <div class="loading-spinner w-4 h-4 border-2 border-white border-t-transparent rounded-full inline-block mr-2"></div>
+                جاري التحليل...
+            `;
+
+            try {
+                const carInfo = `${currentDiagnosis.carBrand} ${currentDiagnosis.carModel} ${currentDiagnosis.carYear}`;
+                const prompt = `قم بتحليل مفصل لكود العطل ${currentDiagnosis.obdCode} في سيارة ${carInfo}. 
+                
+                اشرح:
+                1. السبب التقني للعطل
+                2. التأثير على أداء السيارة
+                3. خطوات التشخيص المفصلة
+                4. نصائح للوقاية
+                5. متى يجب التوجه للورشة فوراً
+                
+                أجب باللغة العربية وبشكل مفصل ومفهوم للشخص العادي.`;
+
+                // Use Poe API to get AI analysis
+                if (window.Poe && window.Poe.sendUserMessage) {
+                    await window.Poe.sendUserMessage(`@Claude-Sonnet-4 ${prompt}`, {
+                        handler: 'ai-analysis-handler',
+                        stream: true,
+                        openChat: false
+                    });
+                } else {
+                    // Fallback simulation
+                    setTimeout(() => {
+                        displaySimulatedAiAnalysis();
+                    }, 2000);
+                }
+
+            } catch (error) {
+                console.error('Error getting AI analysis:', error);
+                displaySimulatedAiAnalysis();
+            }
+        }
+
+        // Register handler for AI analysis
+        if (window.Poe && window.Poe.registerHandler) {
+            window.Poe.registerHandler('ai-analysis-handler', (result) => {
+                const response = result.responses[0];
+                
+                if (response.status === 'error') {
+                    showNotification('حدث خطأ في الحصول على التحليل', 'error');
+                    resetAiButton();
+                    return;
+                }
+
+                if (response.status === 'complete') {
+                    displayAiAnalysis(response.content);
+                    resetAiButton();
+                } else {
+                    // Streaming response
+                    displayAiAnalysis(response.content);
+                }
+            });
+        }
+
+        function displaySimulatedAiAnalysis() {
+            const analysisText = `تحليل متقدم لكود العطل ${currentDiagnosis.obdCode}:
+
+**السبب التقني:**
+${currentDiagnosis.diagnosis.description}
+
+**التأثير على الأداء:**
+هذا العطل قد يؤثر على استهلاك الوقود وانبعاثات العادم وسلاسة تشغيل المحرك.
+
+**خطوات التشخيص المفصلة:**
+1. توصيل جهاز التشخيص OBD-II للتأكد من الكود
+2. فحص المكونات الأساسية المرتبطة بالعطل
+3. إجراء اختبارات وظيفية للتأكد من التشخيص
+4. مراجعة سجل الصيانة للسيارة
+
+**نصائح للوقاية:**
+- الصيانة الدورية وفقاً لجدول الشركة المصنعة
+- استخدام قطع غيار أصلية أو عالية الجودة
+- عدم إهمال العلامات المبكرة للأعطال
+
+**التوجه للورشة:**
+${currentDiagnosis.diagnosis.severity === 'high' ? 
+  'يجب التوجه للورشة فوراً وعدم قيادة السيارة' : 
+  'يمكن القيادة بحذر والتوجه للورشة في أقرب وقت ممكن'}`;
+
+            displayAiAnalysis(analysisText);
+            resetAiButton();
+        }
+
+        function displayAiAnalysis(analysisText) {
+            const aiResultsDiv = document.getElementById('aiAnalysisResults');
+            aiResultsDiv.innerHTML = `
+                <div class="bg-orange-900/20 rounded-lg p-4 border border-orange-500/30">
+                    <pre class="whitespace-pre-wrap text-gray-300 font-cairo leading-relaxed">${analysisText}</pre>
+                </div>
+            `;
+            aiResultsDiv.classList.remove('hidden');
+        }
+
+        function resetAiButton() {
+            document.getElementById('getAiAnalysisBtn').innerHTML = `
+                <i class="fas fa-brain mr-2"></i>
+                تحليل متقدم بالذكاء الاصطناعي
+            `;
+        }
+
+        function addToHistory(diagnosisData) {
+            diagnosisHistory.unshift(diagnosisData);
+            if (diagnosisHistory.length > 10) {
+                diagnosisHistory = diagnosisHistory.slice(0, 10);
+            }
+            localStorage.setItem('diagnosisHistory', JSON.stringify(diagnosisHistory));
+            loadHistory();
+        }
+
+        function loadHistory() {
+            const historyDiv = document.getElementById('historyList');
+            
+            if (diagnosisHistory.length === 0) {
+                historyDiv.innerHTML = '<p class="text-gray-400 text-center">لا توجد تشخيصات سابقة</p>';
+                return;
+            }
+
+            const historyHtml = diagnosisHistory.map((item, index) => {
+                const date = new Date(item.timestamp).toLocaleDateString('ar-SA');
+                const severityColors = {
+                    low: 'bg-green-900/20 border-green-500/30',
+                    medium: 'bg-yellow-900/20 border-yellow-500/30',
+                    high: 'bg-red-900/20 border-red-500/30'
+                };
+
+                return `
+                    <div class="diagnostic-card ${severityColors[item.diagnosis.severity]} rounded-lg p-4 border cursor-pointer hover:bg-opacity-80" 
+                         onclick="loadDiagnosis(${index})">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="obd-code text-lg">${item.obdCode}</span>
+                                <span class="text-gray-400 mr-3">${item.carBrand} ${item.carModel}</span>
+                            </div>
+                            <span class="text-sm text-gray-400">${date}</span>
+                        </div>
+                        <p class="text-sm text-gray-300 mt-1">${item.diagnosis.title}</p>
+                    </div>
+                `;
+            }).join('');
+
+            historyDiv.innerHTML = historyHtml;
+        }
+
+        function loadDiagnosis(index) {
+            const diagnosisData = diagnosisHistory[index];
+            currentDiagnosis = diagnosisData;
+            
+            // Fill form with saved data
+            document.getElementById('carBrand').value = diagnosisData.carBrand;
+            document.getElementById('carModel').value = diagnosisData.carModel;
+            document.getElementById('carYear').value = diagnosisData.carYear;
+            document.getElementById('engineType').value = diagnosisData.engineType;
+            document.getElementById('obdCode').value = diagnosisData.obdCode;
+            
+            // Display results
+            displayDiagnosisResults(diagnosisData);
+            document.getElementById('resultsSection').classList.remove('hidden');
+            document.getElementById('aiAnalysisSection').classList.remove('hidden');
+            
+            // Scroll to results
+            document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function updateDiagnosisCount() {
+            const today = new Date().toDateString();
+            const todayDiagnoses = diagnosisHistory.filter(item => 
+                new Date(item.timestamp).toDateString() === today
+            ).length;
+            
+            document.getElementById('diagnosisCount').textContent = todayDiagnoses;
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            const colors = {
+                success: 'bg-green-600',
+                error: 'bg-red-600',
+                warning: 'bg-yellow-600',
+                info: 'bg-blue-600'
+            };
+            
+            notification.className = `fixed top-4 left-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50 fade-in`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
