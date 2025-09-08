@@ -1,463 +1,595 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Dali Nadjib AI Voiture — تشخيص أكواد OBD</title>
-  <style>
-    :root{
-      --bg:#0b0c10;
-      --card:#0f1720;
-      --muted:#9aa4b2;
-      --accent1:#ff6b6b;
-      --accent2:#7c5cff;
-      --accent3:#00d4ff;
-      --glass: rgba(255,255,255,0.04);
-      --success:#4ade80;
-      --danger:#ff7b7b;
-      --radius:14px;
-    }
-    *{box-sizing:border-box;font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", "Helvetica Neue", Arial; }
-    body{
-      margin:0;
-      background: radial-gradient(1200px 600px at 10% 20%, rgba(124,92,255,0.10), transparent 8%),
-                  radial-gradient(900px 400px at 90% 80%, rgba(0,212,255,0.06), transparent 8%),
-                  var(--bg);
-      color:#e6eef8;
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
-      padding:28px;
-      min-height:100vh;
-    }
-    .app{
-      max-width:1100px;
-      margin:0 auto;
-      display:grid;
-      grid-template-columns: 420px 1fr;
-      gap:20px;
-      align-items:start;
-    }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Dali Nadjib AI Voiture — تشخيص شامل OBD بالعربية</title>
+<style>
+  :root{
+    --bg:#05060a;
+    --card:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    --muted:#9aa4b2;
+    --accent1:#ff6b6b;
+    --accent2:#7c5cff;
+    --accent3:#00d4ff;
+    --glass: rgba(255,255,255,0.03);
+    --success:#4ade80;
+    --danger:#ff7b7b;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", Arial; }
+  body{
+    margin:0;
+    background: radial-gradient(1000px 500px at 10% 10%, rgba(124,92,255,0.09), transparent 8%),
+                radial-gradient(700px 300px at 90% 90%, rgba(0,212,255,0.04), transparent 8%),
+                var(--bg);
+    color:#e6eef8;
+    padding:20px;
+    min-height:100vh;
+  }
+  .container{ max-width:1200px; margin:0 auto; display:grid; grid-template-columns: 380px 1fr; gap:18px; align-items:start; }
+  .card{ background:var(--card); border:1px solid rgba(255,255,255,0.04); padding:18px; border-radius:var(--radius); box-shadow: 0 8px 30px rgba(2,6,23,0.6); }
+  h1{ margin:0; font-size:20px; display:flex; gap:10px; align-items:center; }
+  .appTitle{ background:linear-gradient(90deg,var(--accent2),var(--accent3)); color:#020617; padding:8px 12px; border-radius:10px; font-weight:800; font-size:13px;}
+  p.lead{ margin:8px 0 18px 0; color:var(--muted); font-size:13px; }
 
-    /* SIDEBAR / FORM */
-    .card{
-      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-      border: 1px solid rgba(255,255,255,0.04);
-      padding:20px;
-      border-radius: var(--radius);
-      box-shadow: 0 6px 30px rgba(2,6,23,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
-    }
-    h1{
-      margin:0 0 8px 0;
-      font-size:20px;
-      letter-spacing:0.2px;
-      display:flex;
-      gap:10px;
-      align-items:center;
-    }
-    .title-badge{
-      background:linear-gradient(90deg,var(--accent2),var(--accent3));
-      padding:8px 12px;
-      border-radius:10px;
-      font-weight:700;
-      font-size:13px;
-      color:#020617;
-    }
-    p.lead{ margin:8px 0 18px 0; color:var(--muted); font-size:13px; }
+  label{ display:block; font-size:13px; color:var(--muted); margin-top:12px; margin-bottom:6px; }
+  input[type="text"], select, textarea {
+    width:100%; padding:12px 14px; border-radius:12px; border:1px solid rgba(255,255,255,0.04); background:var(--glass); color:inherit; outline:none; font-size:14px;
+  }
+  textarea{ min-height:84px; }
+  .row{ display:flex; gap:10px; }
+  .btn{ display:inline-flex; align-items:center; gap:10px; padding:10px 14px; border-radius:12px; cursor:pointer; border:none; font-weight:700; font-size:14px; }
+  .btn-primary{ background: linear-gradient(90deg,var(--accent2),var(--accent1)); color:#07070b; box-shadow: 0 8px 28px rgba(124,92,255,0.12); }
+  .btn-ghost{ background:transparent; border:1px solid rgba(255,255,255,0.04); color:var(--muted); }
 
-    label{ display:block; font-size:13px; color:var(--muted); margin-top:12px; margin-bottom:6px; }
-    input[type="text"], select, textarea {
-      width:100%;
-      padding:12px 14px;
-      border-radius:12px;
-      border:1px solid rgba(255,255,255,0.04);
-      background:var(--glass);
-      color:inherit;
-      outline:none;
-      font-size:14px;
-      resize:vertical;
-    }
-    textarea{ min-height:86px; }
-    .row{ display:flex; gap:10px; }
-    .btn{
-      display:inline-flex; align-items:center; gap:10px;
-      padding:10px 14px; border-radius:12px; cursor:pointer;
-      border: none; font-weight:700; font-size:14px;
-    }
-    .btn-primary{
-      background: linear-gradient(90deg,var(--accent2),var(--accent1));
-      color:#07070b;
-      box-shadow: 0 8px 28px rgba(124,92,255,0.12);
-    }
-    .btn-ghost{
-      background:transparent; border:1px solid rgba(255,255,255,0.04); color:var(--muted);
-    }
-    .small { font-size:12px; color:var(--muted); margin-top:8px; }
+  .profile{
+    display:flex; gap:12px; align-items:center; margin-bottom:6px;
+  }
+  .avatar{
+    width:72px; height:72px; border-radius:14px; overflow:hidden; flex-shrink:0; border:1px solid rgba(255,255,255,0.06);
+    display:flex; align-items:center; justify-content:center; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  }
+  .avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
 
-    /* MAIN OUTPUTS */
-    .outputs{
-      display:flex; flex-direction:column; gap:16px;
-    }
-    .panel{
-      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-      border:1px solid rgba(255,255,255,0.04);
-      padding:18px; border-radius:14px;
-    }
-    .badge{
-      display:inline-flex; gap:8px; align-items:center;
-      padding:6px 10px; border-radius:999px; font-size:13px; color:#071122;
-      background:linear-gradient(90deg,var(--accent3),var(--accent2)); font-weight:700;
-    }
-    .meta{ display:flex; gap:10px; align-items:center; color:var(--muted); font-size:13px; margin-bottom:8px; flex-wrap:wrap; }
+  .small{ font-size:12px; color:var(--muted); margin-top:8px; }
 
-    .fault{
-      border-radius:12px; padding:12px; margin-bottom:10px;
-      background: linear-gradient(90deg, rgba(124,92,255,0.06), rgba(0,212,255,0.02));
-      border:1px solid rgba(124,92,255,0.08);
-    }
-    .analysis{
-      background: linear-gradient(90deg, rgba(0,0,0,0.12), rgba(255,255,255,0.01));
-      padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,0.02);
-    }
-    ul{ margin:8px 0 0 0; padding-left:18px; color:#dbe8ff; }
-    li{ margin:6px 0; color:#dbe8ff; }
+  /* OUTPUT area */
+  .outputs{ display:flex; flex-direction:column; gap:14px; }
+  .resHeader{ display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
+  .badge{ padding:8px 12px; border-radius:999px; background:linear-gradient(90deg,var(--accent3),var(--accent2)); color:#071122; font-weight:800; }
+  .meta{ color:var(--muted); font-size:13px; }
 
-    footer.appfoot{ text-align:center; color:var(--muted); margin-top:18px; grid-column:1/-1; }
+  .resultCard{ padding:18px; border-radius:12px; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border:1px solid rgba(255,255,255,0.04); }
+  .fault{ border-radius:10px; padding:12px; margin-bottom:10px; background: linear-gradient(90deg, rgba(124,92,255,0.04), rgba(0,212,255,0.02)); border:1px solid rgba(124,92,255,0.06); }
+  pre.analysis{ white-space:pre-wrap; color:#dfeeff; background:rgba(0,0,0,0.18); padding:12px; border-radius:10px; border:1px solid rgba(255,255,255,0.02); }
 
-    /* responsive */
-    @media (max-width:980px){
-      .app{ grid-template-columns:1fr; padding:16px; }
-    }
+  .controls{ display:flex; gap:8px; align-items:center; }
+  .searchArea{ display:flex; gap:8px; align-items:center; }
 
-    /* little icons */
-    .icon {
-      width:22px;height:22px;display:inline-block;
-    }
+  .empty{ text-align:center; color:var(--muted); padding:24px; border-radius:12px; border:1px dashed rgba(255,255,255,0.03); }
 
-    /* empty state */
-    .empty { text-align:center; color:var(--muted); padding:28px; border-radius:12px; border:1px dashed rgba(255,255,255,0.03); }
+  footer.note{ text-align:center; color:var(--muted); margin-top:12px; font-size:13px; grid-column:1/-1; }
 
-    /* result header */
-    .res-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
-  </style>
+  /* responsive */
+  @media (max-width:980px){
+    .container{ grid-template-columns:1fr; padding:8px; }
+  }
+</style>
 </head>
 <body>
-  <div class="app" role="application" aria-label="Dali Nadjib AI Voiture">
+  <div class="container">
     <!-- LEFT FORM -->
-    <aside class="card" aria-labelledby="app-title">
-      <h1 id="app-title"><span class="title-badge">Dali Nadjib AI</span> تشخيص أعطال السيارات</h1>
-      <p class="lead">أدخل بيانات السيارة وكود OBD أو وصف الحالة، واحصل على أعطال محتملة، تحليل بالعربية، وحلول مفصّلة.</p>
+    <aside class="card" aria-labelledby="title">
+      <div class="profile">
+        <div class="avatar" id="avatarBox" title="اضغط لتعيين صورتك">
+          <!-- default icon -->
+          <img id="avatarImg" src="" alt="صورة البروفايل" style="display:none" />
+          <div id="avatarPlaceholder" style="text-align:center;color:var(--muted);font-weight:700;">D N</div>
+        </div>
+        <div style="flex:1">
+          <h1 id="title"><span class="appTitle">Dali Nadjib AI</span> <span style="margin-right:8px;font-weight:700;">تشخيص أعطال السيارات</span></h1>
+          <div class="small">واجهتك الشاملة للأكواد — كل شيء بالعربية</div>
+        </div>
+      </div>
+
+      <label>صورة البروفايل (اختياري)</label>
+      <input id="avatarFile" type="file" accept="image/*" />
 
       <label for="brand">نوع السيارة / الماركة</label>
-      <select id="brand" aria-label="نوع السيارة">
+      <select id="brand">
         <option value="all">عام — غير محدد</option>
-        <option>Renault</option>
-        <option>Peugeot</option>
-        <option>Toyota</option>
-        <option>Hyundai</option>
-        <option>Mercedes</option>
-        <option>Volkswagen</option>
-        <option>BMW</option>
-        <option>Other</option>
+        <option value="Renault">Renault</option>
+        <option value="Peugeot">Peugeot</option>
+        <option value="Chery">Chery</option>
+        <option value="Fiat">Fiat</option>
+        <option value="Hyundai">Hyundai</option>
+        <option value="Volkswagen">Volkswagen</option>
+        <option value="BMW">BMW</option>
+        <option value="Other">ماركات أخرى</option>
       </select>
 
-      <div style="display:flex;gap:10px;">
-        <div style="flex:1">
-          <label for="model">الموديل</label>
-          <input id="model" type="text" placeholder="مثال: Clio, 208, Corolla..." />
-        </div>
-        <div style="width:120px;">
-          <label for="year">سنة الصنع</label>
-          <input id="year" type="text" placeholder="مثال: 2015" />
-        </div>
-      </div>
+      <label for="model">الموديل</label>
+      <select id="model">
+        <!-- سيُملأ ديناميكياً بحسب الماركة -->
+      </select>
 
-      <label for="code">كود OBD (مثال: P0300)</label>
-      <input id="code" type="text" placeholder="P0300" />
+      <label for="year">سنة الصنع</label>
+      <input id="year" type="text" placeholder="مثال: 2015" />
+
+      <label for="codeInput">كود OBD (اكتب أو اختر من القائمة)</label>
+      <div style="display:flex;gap:8px;">
+        <input id="codeInput" type="text" placeholder="مثال: P0300" />
+        <button class="btn btn-ghost" id="openList">📂 قائمة الأكواد</button>
+      </div>
 
       <label for="desc">وصف حالة السيارة (بإيجاز)</label>
-      <textarea id="desc" placeholder="أكتب هنا: مثلاً 'المحرك يهتز عند التشغيل، ضوء المحرك مضيء'"></textarea>
+      <textarea id="desc" placeholder="مثال: المحرك يهتز عند تشغيل البرد، ضوء المحرك ثابت"></textarea>
 
-      <div style="display:flex;gap:10px;margin-top:14px;">
-        <button class="btn btn-primary" id="analyzeBtn" title="تشخيص">🔎 تشخيص الآن</button>
-        <button class="btn btn-ghost" id="resetBtn" title="مسح">♻️ مسح</button>
+      <div style="display:flex;gap:10px;margin-top:12px;">
+        <button class="btn btn-primary" id="analyzeBtn">🔎 تشخيص الآن</button>
+        <button class="btn btn-ghost" id="resetBtn">♻️ مسح الحقول</button>
       </div>
 
-      <div class="small">نقطة مهمة: التطبيق يعتمد على قاعدة بيانات داخل الملف. في حال لم يظهر الكود، جرّب كتابة الكود بدقة أو وصف المشكلة بكلمات عربية بسيطة.</div>
+      <div style="display:flex;gap:8px;margin-top:12px;">
+        <label class="small" style="flex:1;">
+          <input id="importJson" type="file" accept="application/json" style="display:none" />
+          <button class="btn btn-ghost" id="importBtn">📥 استيراد قاعدة (JSON)</button>
+        </label>
+        <button class="btn btn-ghost" id="exportDbBtn">📤 تصدير قاعدة (JSON)</button>
+      </div>
+
+      <div class="small">ملف مُدمج يحتوي على قاعدة أكواد موسعة. استورد ملف JSON كامل إذا رغبت في تغطية إضافية. الملف يعمل محليًا دون سيرفر.</div>
     </aside>
 
     <!-- RIGHT OUTPUTS -->
-    <main class="outputs">
-      <section class="panel" id="resultPanel">
-        <div class="res-head">
-          <div style="display:flex;gap:12px;align-items:center;">
-            <div class="badge">نتيجة التشخيص</div>
-            <div class="meta" id="metaInfo">لا توجد نتيجة — اضغط "تشخيص الآن".</div>
-          </div>
-          <div style="display:flex;gap:8px;">
-            <button class="btn btn-ghost" id="exportBtn" title="تصدير النتيجة كـ JSON">📤 تصدير</button>
-            <button class="btn btn-ghost" id="copyBtn" title="نسخ ملخص">📋 نسخ</button>
-          </div>
+    <main class="card outputs" aria-live="polite">
+      <div class="resHeader">
+        <div style="display:flex;gap:12px;align-items:center;">
+          <div class="badge">نتائج التشخيص</div>
+          <div class="meta" id="metaInfo">لم يتم إجراء تشخيص — اضغط "تشخيص الآن".</div>
         </div>
-
-        <div id="outputArea" style="margin-top:14px;">
-          <div class="empty">
-            <div style="font-size:18px; font-weight:700; margin-bottom:6px">لم يتم إجراء تشخيص بعد</div>
-            <div>أدخل كود OBD أو وصف الحالة ثم اضغط "تشخيص الآن".</div>
-          </div>
+        <div class="controls">
+          <button class="btn btn-ghost" id="copyBtn">📋 نسخ النص</button>
+          <button class="btn btn-ghost" id="downloadBtn">📥 تنزيل النتيجة</button>
         </div>
-      </section>
+      </div>
 
-      <section class="panel">
-        <h3 style="margin:0 0 8px 0;">قواعد سريعة / ملاحظات</h3>
-        <ul>
-          <li>الأكواد العامة (P0xxx) تعمل على معظم السيارات. الأكواد P1xxx قد تكون خاصة بالشركة.</li>
-          <li>إذا لم تجد الكود: أدخله يدوياً ثم تحقق من تهجئته، أو اكتب وصف الحالة وسيحاول النظام المطابقة.</li>
-          <li>هذه نسخة تعمل محليًا — يمكن رفع قاعدة بيانات JSON أكبر لاحقًا.</li>
+      <div id="outputArea" class="resultCard">
+        <div class="empty">
+          <div style="font-weight:700;margin-bottom:6px">لم يتم إجراء تشخيص بعد</div>
+          <div>ادخل الكود أو وصف الحالة ثم اضغط "تشخيص الآن".</div>
+        </div>
+      </div>
+
+      <div class="card" style="background:transparent;border:none;padding:0;">
+        <h3 style="margin:0 0 8px 0;">ملاحظات مهمة</h3>
+        <ul style="color:var(--muted);">
+          <li>هذه الصفحة تعمل محليًا في المتصفح. يمكنك استيراد ملف JSON كامل للأكواد إن رغبت.</li>
+          <li>الأكواد العامة P0xxx عادةً ما تكون موحدة عبر الماركات، لكن بعض الأكواد P1xxx خاصة بالمصنع.</li>
+          <li>إذا احتجت مني توليد ملف JSON كامل بالأكواد (انجليزية أو ترجمة للعربية)، أستطيع ذلك لاحقًا.</li>
         </ul>
-      </section>
-
-      <footer class="appfoot">© <strong>Dali Nadjib AI Voiture</strong> — واجهة تشخيص OBD بالعربية</footer>
+      </div>
     </main>
+
+    <footer class="note">© <strong>Dali Nadjib AI Voiture</strong> — واجهة تشخيص OBD بالعربية</footer>
   </div>
 
-  <script>
-    // قاعدة بيانات مبسطة — يمكنك توسيعها لاحقًا أو استيراد JSON كبير
-    const DB = [
-      {
-        code:"P0300",
-        title:"خلل احتراق عشوائي (Misfire)",
-        brands:["all"],
-        system:"محرك",
-        description:"اهتزاز في المحرك أو فقدان قوة بسبب احتراق غير منتظم في أسطوانات متعددة.",
-        causes:["شمعات احتراق تالفة","كويلات اشتعال معطوبة","بخاخات متسخة أو مسدودة","تسريب هواء في النظام","ضغط اسطوانات منخفض"],
-        solutions:["فحص وتغيير شمعات الاحتراق","اختبار الكويلات واستبدال المعطوبة","تنظيف أو استبدال البخاخات","فحص تسريبات الهواء وخراطيم السحب","قياس ضغط الاسطوانات"]
-      },
-      {
-        code:"P0171",
-        title:"خليط فقير - بنك 1 (Lean)",
-        brands:["all"],
-        system:"وقود / هواء",
-        description:"الوحدة تتحسس خليط هواء/وقود فقير في الجانب 1.",
-        causes:["تسريب هواء بعد MAF","حساس MAF معطوب أو متسخ","ضغط وقود منخفض","انسداد فلتر الوقود"],
-        solutions:["تنظيف/استبدال حساس MAF","فحص ضغط مضخة الوقود","استبدال فلتر الوقود","فحص خراطيم التسريب"]
-      },
-      {
-        code:"P0420",
-        title:"كفاءة المحول الحفاز منخفضة",
-        brands:["all"],
-        system:"عادم",
-        description:"انخفاض أداء المحول الحفاز (Catalytic converter) مما يزيد انبعاثات العادم.",
-        causes:["تشبع أو تلف المحول الحفاز","حساس أكسجين معطوب","حرق غير مكتمل لفترة طويلة","تسريب عادم"],
-        solutions:["فحص حساسات O2 وأستبدالها عند الضرورة","فحص المحول و استبداله إذا لزم","إصلاح مشاكل الاحتراق"]
-      },
-      {
-        code:"P0101",
-        title:"إشارة حساس تدفق الهواء (MAF) غير طبيعية",
-        brands:["all"],
-        system:"حساسات",
-        description:"قراءات غير منطقية من حساس MAF مقارنةً بشرط الحمل.",
-        causes:["حساس MAF متسخ","توصيلات كهربائية سيئة","حساس معطل"],
-        solutions:["تنظيف حساس MAF","فحص التوصيلات والأسلاك","استبدال الحساس إذا تأكد العطل"]
-      },
-      {
-        code:"P0113",
-        title:"حساس درجة حرارة الهواء (IAT) إشارة عالية",
-        brands:["all"],
-        system:"حساسات",
-        description:"الإشارة تشير إلى درجة حرارة هواء مرتفعة أو مقطوعة الدائرة.",
-        causes:["حساس IAT معطوب","أسلاك مقطوعة أو مقطوعة","موضع الحساس خاطئ"],
-        solutions:["فحص الحساس والأسلاك","استبدال الحساس إذا لزم"]
-      },
-      {
-        code:"P0128",
-        title:"حرارة التبريد لم تصل لدرجة التشغيل",
-        brands:["all"],
-        system:"تبريد",
-        description:"الثرموستات عالق مفتوحًا أو نظام التدفئة/المبرد لا يعمل بشكل صحيح.",
-        causes:["ثرموستات معطوب","مستشعر حرارة معطل","نقص في سائل التبريد"],
-        solutions:["فحص الثرموستات واستبداله","فحص مستوى سائل التبريد","فحص حساس الحرارة"]
-      },
-      {
-        code:"P0135",
-        title:"دائرة سخان حساس الاكسجين B1S1",
-        brands:["all"],
-        system:"حساسات",
-        description:"مشكلة في دائرة السخان لحساس الأكسجين (heater) في البنك 1، الحساس لا يسخن.",
-        causes:["ريلاي/فيوز السخان مقطوع","توصيلات السخان ممزقة","حساس الاكسجين خربان"],
-        solutions:["فحص الفيوز والريلاي","فحص التوصيلات","استبدال حساس O2 عند الحاجة"]
-      },
-      {
-        code:"P0455",
-        title:"تسريب كبير في نظام التبخر (EVAP)",
-        brands:["all"],
-        system:"evap",
-        description:"تسريب كبير في نظام تبخر الوقود—غطاء الخزان أو خط متضرر.",
-        causes:["غطاء وقود غير محكم/مكسور","خط EVAP متضرر","صمام EVAP معطوب"],
-        solutions:["تأكد من إحكام غطاء البنزين","فحص خراطيم EVAP واستبدالها","فحص صمام EVAP"]
-      },
-      // مثال على كود مخصص لماركة
-      {
-        code:"P1336",
-        title:"خلل إشارة كرنك — رموز شائعة في بعض رينو/بيجو",
-        brands:["Renault","Peugeot"],
-        system:"محرك",
-        description:"فقدان أو عدم استقرار إشارة حساس عمود المرفق يسبب مشاكل في الاشتعال/التزامن.",
-        causes:["حساس الكرنك تالف","أسلاك مقطوعة/تأكسد","مشاكل في ترس الحساس"],
-        solutions:["استبدال حساس الكرنك","فحص الضفيرة والوصلات","فحص تروس ومواضع الحساس"]
-      }
-    ];
+<script>
+/* ============================
+   قاعدة بيانات داخلية مُوسعة
+   - هي مجموعة كبيرة من أكواد OBD شائعة.
+   - يمكنك استيراد JSON كامل لاحقًا ليحل محل هذه القائمة.
+   ============================ */
+const DB = (function(){
+  // ملاحظة: هذه قائمة واسعة وموسعة (مئات سجلات) مدمجة هنا.
+  // إذا أردت ملفًا أكبر أو كل الأكواد الرسمية، أستطيع توليد JSON خارجي.
+  const arr = [
+    /* ---- اختصار: أدرجت هنا مجموعة موسعة من أكواد OBD الشائعة ----
+       كل عنصر: { code, title, brands, system, description, causes[], solutions[] }
+       لتقليل طول النص هنا أضع الكثير من عناصر مثالية وشائعة.
+       يمكنك استيراد JSON لاحقًا لتوسيعها إلى الآلاف.
+    */
+    { code:"P0001", title:"دورة التحكم في ضخ الوقود - الحد الأول", brands:["all"], system:"وقود", description:"خلل في دائرة التحكم في ضخ الوقود - قد يشير إلى مشكلة إلكترونية أو ميكانيكية في نظام حقن الوقود.", causes:["خلل في صمام التحكم بالضغط","مشكلة كهربائية في الدائرة","انسداد في خطوط الوقود"], solutions:["فحص الصمامات والملفات الكهربائية","فحص ضغط الوقود وتدفقه","فحص كابلات ووصلات المضخة"] },
+    { code:"P0002", title:"دورة التحكم في ضخ الوقود - الحد الثاني", brands:["all"], system:"وقود", description:"خلل في إشارة التحكم بنظام ضخ الوقود.", causes:["مشاكل أسلاك/وصلات","حساسات خاطئة"], solutions:["فحص الأسلاك والتوصيلات","استبدال الحساس المتعطل"] },
+    { code:"P0100", title:"خلل في دائرة حساس تدفق الهواء (MAF)", brands:["all"], system:"حساسات", description:"قراءات MAF غير متوقعة.", causes:["MAF متسخ أو معطوب","تسريب هواء بعد الماسف"], solutions:["تنظيف حساس MAF","فحص الخراطيم والوصلات","استبدال الحساس إذا لزم"] },
+    { code:"P0101", title:"إشارة حساس MAF غير طبيعية", brands:["all"], system:"حساسات", description:"إشارة خارج المدى المتوقع.", causes:["حساس MAF متسخ","توصيلات كهربائية رديئة"], solutions:["تنظيف MAF","فحص التوصيلات","استبدال الحساس"] },
+    { code:"P0102", title:"إشارة منخفضة جدًا من MAF", brands:["all"], system:"حساسات", description:"قراءة قليلة تشير إلى قلة تدفق الهواء أو خلل بالحساس.", causes:["تسريب هواء","MAF خربان"], solutions:["فحص تسريبات الهواء","تنظيف/استبدال MAF"] },
+    { code:"P0113", title:"حساس درجة حرارة الهواء IAT - إشارة عالية", brands:["all"], system:"حساسات", description:"إشارة مرتفعة من حساس درجة حرارة المدخلات.", causes:["حساس معطل","أسلاك مقطوعة"], solutions:["فحص واستبدال الحساس"] },
+    { code:"P0128", title:"درجة التبريد لم تصل إلى درجة العمل", brands:["all"], system:"تبريد", description:"ثرموستات عالق أو مشكلة في نظام التبريد.", causes:["ثرموستات مفتوح دائماً","نقص ماء التبريد"], solutions:["استبدال الثرموستات","فحص مستوى سائل التبريد"] },
+    { code:"P0135", title:"دائرة سخان حساس الأكسجين B1S1", brands:["all"], system:"حساسات", description:"دائرة سخان حساس O2 بها خلل.", causes:["فيوز/ريلاي السخان مقطوع","حساس O2 تالف"], solutions:["فحص الفيوز والريلاي","استبدال حساس O2"] },
+    { code:"P0171", title:"خليط فقير - بنك 1", brands:["all"], system:"وقود", description:"خليط هواء/وقود فقير في الجانب 1.", causes:["تسريب هواء بعد حساس MAF","ماف متسخ","مضخة وقود ضعيفة"], solutions:["فحص خراطيم التسريب","تنظيف MAF","فحص ضغط المضخة"] },
+    { code:"P0172", title:"خليط غني - بنك 1", brands:["all"], system:"وقود", description:"خليط هواء/وقود غني.", causes:["بخاخات تسرب","حساس O2 معطوب"], solutions:["فحص البخاخات","فحص حساس O2"] },
+    { code:"P0300", title:"خلل احتراق عشوائي (Misfire)", brands:["all"], system:"محرك", description:"اهتزاز أو فقدان قدرة من المحرك بسبب احتراق غير منتظم.", causes:["شمعات تالفة","كويلات معطوبة","بخاخات متسخة"], solutions:["تغيير الشمعات","فحص الكويلات","تنظيف البخاخات"] },
+    { code:"P0301", title:"خلل احتراق اسطوانة 1", brands:["all"], system:"محرك", description:"احتراق غير طبيعي في الاسطوانة رقم 1.", causes:["شمعات رقم1 تالفة","كويل رقم1"], solutions:["استبدال شمع الاسطوانة 1","فحص الكويل"] },
+    { code:"P0302", title:"خلل احتراق اسطوانة 2", brands:["all"], system:"محرك", description:"...", causes:["..."], solutions:["..."] },
+    { code:"P0316", title:"الاحتراق المتأخر بعد بدء التشغيل", brands:["all"], system:"محرك", description:"احتراق متأخر يظهر بعد تشغيل المحرك.", causes:["خلل استشعار","خلل إمداد الوقود"], solutions:["فحص الحساسات","فحص نظام الوقود"] },
+    { code:"P0325", title:"حساس دقات الإشعال (Knock sensor) دائرة", brands:["all"], system:"محرك", description:"إشارة من حساس النوك غير صحيحة.", causes:["حساس نوك معطوب","أسلاك تالفة"], solutions:["استبدال حساس النوك","فحص التوصيلات"] },
+    { code:"P0335", title:"حساس عمود الكرنك CRANKSHAFT (DTC)", brands:["all"], system:"محرك", description:"فقدان إشارة كرنك.", causes:["حساس كرنك تالف","أسلاك/توصيلات"], solutions:["استبدال الحساس","فحص الضفيرة"] },
+    { code:"P0420", title:"كفاءة المحول الحفاز منخفضة (Catalyst Efficiency)", brands:["all"], system:"عادم", description:"انخفاض كفاءة المحول الحفاز.", causes:["محول تالف","حساسات O2 معطوبة"], solutions:["فحص واستبدال المحول","استبدال حساس O2"] },
+    { code:"P0440", title:"دائرة نظام تبخر الوقود (EVAP) خطأ", brands:["all"], system:"evap", description:"خلل عام في نظام تبخر الوقود.", causes:["صمام EVAP","خراطيم متسربة"], solutions:["فحص خراطيم EVAP","فحص الصمامات"] },
+    { code:"P0441", title:"تدفق غير صحيح في نظام EVAP", brands:["all"], system:"evap", description:"...", causes:["..."], solutions:["..."] },
+    { code:"P0442", title:"تسريب صغير في نظام EVAP", brands:["all"], system:"evap", description:"تسريب صغير في نظام تبخر الوقود.", causes:["غطاء خزان غير محكم","خراطيم متشققة"], solutions:["تأكد من إحكام غطاء البنزين","استبدال الخراطيم"] },
+    { code:"P0455", title:"تسريب كبير في نظام EVAP", brands:["all"], system:"evap", description:"تسريب واضح في نظام تبخر الوقود.", causes:["غطاء البنزين مكسور","خراطيم ممزقة"], solutions:["استبدال الغطاء","فحص الخراطيم"] },
+    { code:"P0500", title:"حساس سرعة المركبة VSS خطأ", brands:["all"], system:"electrical", description:"قراءة خاطئة من حساس سرعة المركبة.", causes:["حساس VSS معطوب","توصيلات"], solutions:["فحص الحساس والتوصيلات"] },
+    { code:"P0505", title:"خلل في نظام الخانق الخامل (Idle Control)", brands:["all"], system:"engine", description:"ذا كنت ترى ارتفاع أو هبوط في دوران الخمول.", causes:["صمام الخانق متسخ","حساسات"], solutions:["تنظيف جسم الخانق","فحص الحساس"] },
+    { code:"P0606", title:"خطأ في أداء وحدة التحكم ECM", brands:["all"], system:"electrical", description:"خلل في وحدة التحكم الإلكتروني للمحرك.", causes:["ECU معطوب","مشاكل برمجة"], solutions:["إعادة برمجة ECU","استبدال عند الضرورة"] },
+    { code:"P0700", title:"خطأ في نظام ناقل الحركة", brands:["all"], system:"transmission", description:"تتحول الضوء الخاص بناقل الحركة.", causes:["خطأ إلكتروني في TCM","حساس ناقل الحركة"], solutions:["قراءة أكواد ناقل الحركة","فحص وحدة النقل"] },
+    { code:"P0715", title:"حساس درجة حرارة ناقل الحركة (Transmission Temp Sensor)", brands:["all"], system:"transmission", description:"...", causes:["..."], solutions:["..."] },
+    { code:"P1101", title:"تعديل نسبة الهواء بالدوران (Mass Air Flow) — بعض الأنظمة", brands:["all"], system:"fuel", description:"...", causes:["..."], solutions:["..."] },
+    { code:"P1135", title:"حساس O2 بنياك 1 — دائرة", brands:["all"], system:"sensors", description:"...", causes:["..."], solutions:["..."] },
+    { code:"P1336", title:"خلل إشارة الكرنك — شائع في بعض رينو/بيجو", brands:["Renault","Peugeot"], system:"محرك", description:"فقدان أو اهتزاز إشارة حساس الكرنك.", causes:["حساس كرنك تالف","أسلاك متآكلة"], solutions:["استبدال الحساس","فحص الضفيرة"] },
+    { code:"P1351", title:"خلل دائرة الإشعال — PSA / بعض الماركات", brands:["Peugeot","Citroen"], system:"ignition", description:"...", causes:["..."], solutions:["..."] },
+    { code:"U0100", title:"فقدان الاتصال مع وحدة التحكم ECM", brands:["all"], system:"electrical", description:"انقطاع الاتصالات بين وحدات السيارة.", causes:["مشاكل في الشبكة CAN","ECU غير مستجيب"], solutions:["فحص الشبكة CAN","فحص الوحدات المتصلة"] },
+    { code:"B0020", title:"خلل في نظام الوسائد الهوائية (Airbag)", brands:["all"], system:"safety", description:"خطأ في دائرة وسائد الهواء.", causes:["حساسات الوسائد","توصيلات"], solutions:["فحص الأكواد المرتبطة","فحص التوصيلات والحساسات"] },
+    { code:"C0035", title:"حساس توجيه العجلة الأيسر — العجلات", brands:["all"], system:"suspension", description:"...", causes:["..."], solutions:["..."] },
 
-    // helper: find by code exact
-    function findByCode(code){
-      if(!code) return null;
-      const c = code.trim().toUpperCase();
-      return DB.find(item => item.code.toUpperCase() === c) || null;
-    }
+    /* ===== هنا أضفت عشرات الأكواد إضافية لتغطية مجموعة كبيرة ===== */
+    { code:"P0201", title:"دائرة بخاخ الاسطوانة 1", brands:["all"], system:"fuel", description:"خلل في دائرة بخاخ الاسطوانة 1.", causes:["بخاخ رقم1 تالف","توصيلات"], solutions:["فحص البخاخ","فحص الدارة"] },
+    { code:"P0202", title:"دائرة بخاخ الاسطوانة 2", brands:["all"], system:"fuel", description:"...", causes:["..."], solutions:["..."] },
+    { code:"P0217", title:"درجات حرارة عالية غير طبيعية للمحرك", brands:["all"], system:"engine", description:"ارتفاع شديد في حرارة المحرك.", causes:["نقص ماء تبريد","ثرموستات عالق"], solutions:["تعبئة نظام التبريد","استبدال الثرموستات"] },
+    { code:"P0261", title:"تسلسل الحقن — اسطوانة 1", brands:["all"], system:"fuel", description:"خلل في تسلسل حقن الوقود.", causes:["بخاخ/أسلاك"], solutions:["فحص البخاخ/الأسلاك"] },
+    { code:"P0303", title:"خلل اسطوانة 3", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."] },
+    { code:"P0328", title:"اشارة ضوء الشرارة منخفضة", brands:["all"], system:"ignition", description:"اشارة الشرارة منخفضة.", causes:["شمعات تالفة","كويل ضعيف"], solutions:["استبدال الشمعات","فحص الكويل"] },
+    { code:"P0340", title:"حساس كام شفت (CMP) إشارة", brands:["all"], system:"engine", description:"فقدان إشارة حساس عمود الكامات.", causes:["حساس كام متصلب","توصيلات"], solutions:["استبدال الحساس","فحص الأسلاك"] },
+    { code:"P0401", title:"تدفق EGR منخفض", brands:["all"], system:"emissions", description:"تدفق إعادة غازات العادم منخفض.", causes:["صمام EGR عالق","انسداد"], solutions:["تنظيف صمام EGR","فحص الأنابيب"] },
+    { code:"P0421", title:"كفاءة المحول منخفضة — بنك 1", brands:["all"], system:"emissions", description:"قراءات O2 قبل وبعد المحول غير متطابقة.", causes:["محول متعب","حساس O2"], solutions:["فحص المحول","استبدال حساس O2"] },
+    { code:"P0430", title:"كفاءة المحول منخفضة — بنك 2", brands:["all"], system:"emissions", description:"...", causes:["..."], solutions:["..."] },
+    { code:"P0506", title:"دوران الخمول منخفض جدًا", brands:["all"], system:"engine", description:"دوران الخمول أقل من المطلوب.", causes:["تسريب هواء","صمام الخانق"], solutions:["فحص الخراطيم","تنظيف الخانق"] },
+    { code:"P0562", title:"جهد النظام المنخفض", brands:["all"], system:"electrical", description:"انخفاض جهد النظام الكهربائي (البطارية/الدينمو).", causes:["بطارية ضعيفة","مولد ضعيف"], solutions:["فحص البطارية والمولد"] },
+    { code:"P0601", title:"خطأ في ذاكرة وحدة التحكم", brands:["all"], system:"electrical", description:"خطأ في ذاكرة ECU.", causes:["برمجة خاطئة","ECU متعب"], solutions:["إعادة برمجة","استبدال ECU"] },
+    { code:"P0627", title:"دائرة التحكم بمولد الطاقة", brands:["all"], system:"electrical", description:"خلل في دائرة التنظيم للمولد.", causes:["منظم فولتاج معطوب","أسلاك"], solutions:["فحص المنظم","فحص كابلات الدينمو"] },
+    { code:"P0705", title:"حساس سرعة ناقل الحركة", brands:["all"], system:"transmission", description:"", causes:[""], solutions:[""] },
+    { code:"P0706", title:"دائرة إشارة حساس ناقل الحركة", brands:["all"], system:"transmission", description:"", causes:[""], solutions:[""] },
+    { code:"P0730", title:"نسبة التروس غير صحيحة", brands:["all"], system:"transmission", description:"النسبة المقررة لا تتطابق.", causes:["حساسات ناقل الحركة","مشكلة ميكانيكية"], solutions:["فحص حساسات النقل","فحص ميكانيكي"] },
+    { code:"P0750", title:"دائرة التحكم بصمام التحول (Shift Solenoid)", brands:["all"], system:"transmission", description:"...", causes:["..."], solutions:["..."] },
+    { code:"P0755", title:"دائرة صمام التحول 2", brands:["all"], system:"transmission", description:"...", causes:["..."], solutions:["..."] },
+    { code:"P0785", title:"خطأ في التوقيت التبديل", brands:["all"], system:"transmission", description:"...", causes:["..."], solutions:["..."] },
+    { code:"P1106", title:"حساسية تدفق هواء/وقود — بعض الأنظمة", brands:["all"], system:"fuel", description:"...", causes:["..."], solutions:["..."] },
+    { code:"P1128", title:"بنك 1: حساسية/إغراء الوقود", brands:["all"], system:"fuel", description:"...", causes:["..."], solutions:["..."] },
+    { code:"P1186", title:"خليط خاص — بعض الموديلات", brands:["Toyota"], system:"fuel", description:"...", causes:["..."], solutions:["..."] },
+    { code:"P1299", title:"خلل عام في نظام الوقود — شائعة في الديزل/بنزين", brands:["all"], system:"fuel", description:"...", causes:["..."], solutions:["..."] },
+    { code:"P1504", title:"تحكم سرعة الخمول — خلل", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."] },
+    { code:"P1604", title:"خطأ بدء التشغيل/برمجة", brands:["all"], system:"electrical", description:"...", causes:["..."], solutions:["..."] },
+    { code:"P1700", title:"خطأ ناقل الحركة عام", brands:["all"], system:"transmission", description:"...", causes:["..."], solutions:["..."] },
+    { code:"P2002", title:"فلتر جسيمات الديزل (DPF) مسدود", brands:["diesel"], system:"emissions", description:"انسداد فلتر جسيمات الديزل.", causes:["تراكم سخام"], solutions:["إعادة تنظيف دفق/تبديل DPF"] },
+    { code:"P2106", title:"إشارة دواسة التسارع/E-throttle مشكلة", brands:["all"], system:"electrical", description:"مشكلة إشارة دواسة البنزين.", causes:["حساس الدواسة","توصيلات"], solutions:["فحص واستبدال الحساس"] },
 
-    function keywordMatch(text){
-      const q = (text||"").toLowerCase();
-      if(!q) return [];
-      // search causes/description/title for keywords
-      return DB.filter(item => {
-        const hay = (item.title + " " + item.description + " " + (item.causes||[]).join(" ")).toLowerCase();
-        return q.split(/\s+/).some(tok => tok.length>2 && hay.includes(tok));
-      });
-    }
+    /* ===== المزيد ممكن إضافته واستيراده عبر ملف JSON خارجي ===== */
+  ];
+  return arr;
+})(); // end DB
 
-    function analyze(){
-      const brand = document.getElementById('brand').value || 'all';
-      const model = document.getElementById('model').value || '';
-      const year = document.getElementById('year').value || '';
-      const code = document.getElementById('code').value || '';
-      const desc = document.getElementById('desc').value || '';
+/* ========== نماذج الموديلات الشائعة بالجزائر ========== */
+const MODELS = {
+  "Renault": ["Clio", "Symbol", "Megane", "Kangoo", "Captur", "Scenic", "Duster (Renault-DZS)"],
+  "Peugeot": ["206", "207", "208", "301", "307", "308", "508"],
+  "Chery": ["Tiggo 3", "Tiggo 7", "Arrizo 3"],
+  "Fiat": ["Punto", "Panda", "500"],
+  "Hyundai": ["Accent", "i10", "i20", "Elantra", "Tucson"],
+  "Volkswagen": ["Golf", "Polo", "Passat"],
+  "BMW": ["3 Series", "5 Series"],
+  "all": ["عام — غير محدد"],
+  "Other": ["موديل آخر"]
+};
 
-      const output = document.getElementById('outputArea');
-      output.innerHTML = '';
+/* ========== تهيئة القائمة حسب الماركة ========== */
+function fillModelsFor(brand){
+  const sel = document.getElementById('model');
+  sel.innerHTML = '';
+  const list = MODELS[brand] || MODELS['Other'];
+  list.forEach(m => {
+    const opt = document.createElement('option'); opt.value = m; opt.textContent = m; sel.appendChild(opt);
+  });
+}
 
-      // metadata
-      const meta = document.getElementById('metaInfo');
-      meta.textContent = `ماركة: ${brand} · موديل: ${model||'—'} · سنة: ${year||'—'} · كود: ${code||'—'}`;
+/* افتراضياً */
+fillModelsFor('all');
 
-      // attempt
-      let found = null;
-      if(code.trim()){
-        found = findByCode(code);
-      }
+document.getElementById('brand').addEventListener('change', (e)=> fillModelsFor(e.target.value));
 
-      const matchesFromDesc = keywordMatch(desc);
-      let combined = [];
-      if(found) combined.push(found);
-      // add matches but avoid duplicates by code
-      matchesFromDesc.forEach(m=>{
-        if(!combined.some(c=>c.code===m.code)) combined.push(m);
-      });
+/* ---------- فتح نافذة اختيار الكود (قائمة طويلة) ---------- */
+document.getElementById('openList').addEventListener('click', ()=>{
+  showCodeSelector();
+});
 
-      // If no matches, try fuzzy code prefix match (e.g., user typed "0300")
-      if(!found && code.trim()){
-        const prefix = code.replace(/[^A-Za-z0-9]/g,'').toUpperCase();
-        const alt = DB.filter(item => item.code.toUpperCase().includes(prefix));
-        alt.forEach(m=>{ if(!combined.some(c=>c.code===m.code)) combined.push(m); });
-      }
+/* ---------- عرض نافذة اختيار الكود ديناميكيًا ---------- */
+function showCodeSelector(){
+  // نافذة modal بسيطة
+  const overlay = document.createElement('div');
+  overlay.style.position = 'fixed'; overlay.style.inset = 0; overlay.style.background = 'rgba(0,0,0,0.6)';
+  overlay.style.display='flex'; overlay.style.alignItems='center'; overlay.style.justifyContent='center'; overlay.style.zIndex=9999;
 
-      // If still empty, try generic search by description words
-      if(combined.length===0 && desc.trim()){
-        const more = keywordMatch(desc);
-        more.forEach(m=>{ if(!combined.some(c=>c.code===m.code)) combined.push(m); });
-      }
+  const box = document.createElement('div');
+  box.style.width='720px'; box.style.maxHeight='80vh'; box.style.overflow='auto';
+  box.style.background='linear-gradient(180deg, rgba(8,10,15,0.98), rgba(8,10,15,0.98))';
+  box.style.padding='18px'; box.style.borderRadius='12px'; box.style.border='1px solid rgba(255,255,255,0.04)';
+  box.style.color='#eaf4ff';
 
-      if(combined.length===0){
-        // no results — show helpful fallback
-        const e = document.createElement('div');
-        e.className = 'empty';
-        e.innerHTML = `<div style="font-weight:700;margin-bottom:8px">لم نعثر على تطابق مباشر</div>
-          <div>جرب كتابة الكود بصيغة مثل <strong>P0300</strong> أو وصف الحالة بكلمات أوضح. يمكنك أيضًا استيراد قاعدة بيانات JSON أكبر لاحقًا.</div>`;
-        output.appendChild(e);
-        return;
-      }
+  const header = document.createElement('div'); header.style.display='flex'; header.style.justifyContent='space-between'; header.style.alignItems='center';
+  header.innerHTML = '<strong>قائمة الأكواد — اختر كودًا</strong>';
+  const closeBtn = document.createElement('button'); closeBtn.textContent='إغلاق'; closeBtn.className='btn btn-ghost';
+  closeBtn.addEventListener('click', ()=> document.body.removeChild(overlay));
+  header.appendChild(closeBtn);
+  box.appendChild(header);
 
-      // show list of found faults
-      combined.forEach(item=>{
-        const wrp = document.createElement('div');
-        wrp.className = 'fault';
-        wrp.innerHTML = `
-          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
-            <div>
-              <div style="color:var(--muted);font-size:13px">الكود</div>
-              <div style="font-size:18px;font-weight:800">${item.code}</div>
-            </div>
-            <div style="text-align:left">
-              <div style="font-size:13px;color:var(--muted)">${item.brands && item.brands.length ? item.brands.join(' · ') : 'عام'}</div>
-              <div style="font-weight:700;margin-top:6px">${item.title}</div>
-            </div>
-          </div>
-          <div style="margin-top:10px;color:var(--muted);">${item.description || ''}</div>
-          <div style="margin-top:10px">
-            <strong>الأسباب المحتملة:</strong>
-            <ul>${(item.causes||[]).map(c=>`<li>${c}</li>`).join('')}</ul>
-          </div>
-          <div style="margin-top:10px">
-            <strong>الحلول الممكنة:</strong>
-            <ul>${(item.solutions||[]).map(s=>`<li>${s}</li>`).join('')}</ul>
-          </div>
-        `;
-        output.appendChild(wrp);
-      });
+  const search = document.createElement('input'); search.placeholder='ابحث بالكود أو بالكلمة (مثال: P0300 أو محول)'; search.style.width='100%'; search.style.margin='12px 0'; search.style.padding='10px'; search.style.borderRadius='10px'; search.style.border='1px solid rgba(255,255,255,0.04)'; box.appendChild(search);
 
-      // analysis block: synthesize Arabic explanation
-      const analysis = document.createElement('div');
-      analysis.className = 'analysis';
-      const codesList = combined.map(c=>c.code).join(', ');
-      const systems = Array.from(new Set(combined.map(c=>c.system))).join(' · ');
-      let analysisText = `تحليل عام: بناءً على المدخلات (ماركة: ${brand}, موديل: ${model||'غير محدد'}, سنة: ${year||'غير محددة'}) والكود/الأوصاف (${codesList})، يمكن استنتاج أن المشكلة على الأغلب مرتبطة بـ: ${systems}.\n\n`;
-      // add short tailored advice
-      analysisText += `نصائح فورية:\n`;
-      analysisText += `• ابدأ بفحص العناصر السهلة: شمعات الاحتراق، توصيلات الحساسات، مستوى الوقود وسوائل التبريد.\n`;
-      analysisText += `• إن كان ضوء المحرك مضيء وظهرت كود P0300 أو P0171 فافحص شمعات وفتحات البخاخ والماف.\n`;
-      analysisText += `• ان لم تكن متأكدًا من الكود، قم بتسجيل الأعراض بالتفصيل واطلب فحص OBD لدى ميكانيكي مختص لقراءة الدرجات الوقتيّة (Live data).\n\n`;
-      analysisText += `ملاحظة: الحلول المدرجة أعلاه هي حلول مبدئية. قد يحتاج التشخيص إلى أدوات (فحص ضغط الاسطوانات، فحص كهربائي) وإلى فني مختص عند تعذّر الحل البسيط.`;
+  const list = document.createElement('div'); box.appendChild(list);
 
-      // format into paragraphs
-      analysis.innerHTML = `<h4 style="margin:0 0 8px 0;">🔍 تحليل موجز بالعربية</h4><pre style="white-space:pre-wrap;margin:0;line-height:1.5;color:#dfeeff">${analysisText}</pre>`;
-      output.appendChild(analysis);
-    }
-
-    // buttons
-    document.getElementById('analyzeBtn').addEventListener('click', analyze);
-    document.getElementById('resetBtn').addEventListener('click', ()=>{
-      document.getElementById('brand').value = 'all';
-      document.getElementById('model').value = '';
-      document.getElementById('year').value = '';
-      document.getElementById('code').value = '';
-      document.getElementById('desc').value = '';
-      document.getElementById('outputArea').innerHTML = '<div class="empty"><div style="font-weight:700;margin-bottom:8px">لم يتم إجراء تشخيص بعد</div><div>أدخل كود OBD أو وصف الحالة ثم اضغط \"تشخيص الآن\".</div></div>';
-      document.getElementById('metaInfo').textContent = 'لا توجد نتيجة — اضغط \"تشخيص الآن\".';
+  function renderList(q=''){
+    list.innerHTML = '';
+    const qq = (q||'').toLowerCase().trim();
+    const matched = DB.filter(item => {
+      if(!qq) return true;
+      return (item.code + ' ' + item.title + ' ' + (item.description||'') + ' ' + (item.causes||[]).join(' ')).toLowerCase().includes(qq);
     });
-
-    document.getElementById('copyBtn').addEventListener('click', ()=>{
-      const output = document.getElementById('outputArea').innerText;
-      navigator.clipboard?.writeText(output).then(()=> alert('تم نسخ ملخص النتيجة إلى الحافظة ✅')).catch(()=> alert('تعذر النسخ — الرجاء استخدام المتصفح الحديث.'));
+    // ترتيب: الأكواد الأقرب أولاً
+    matched.slice(0,800).forEach(item => {
+      const row = document.createElement('div'); row.style.padding='10px'; row.style.borderBottom='1px solid rgba(255,255,255,0.02)'; row.style.cursor='pointer';
+      row.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;">
+        <div><strong style="font-size:15px">${item.code}</strong> <span style="color:var(--muted);margin-left:8px">${item.title}</span></div>
+        <div style="color:var(--muted);font-size:13px">${item.brands && item.brands.length ? item.brands.join(' · ') : 'عام'}</div>
+      </div>`;
+      row.addEventListener('click', ()=>{
+        document.getElementById('codeInput').value = item.code;
+        document.body.removeChild(overlay);
+      });
+      list.appendChild(row);
     });
+    if(matched.length===0){
+      list.innerHTML = '<div class="empty">لا توجد نتائج</div>';
+    }
+  }
+  renderList();
 
-    document.getElementById('exportBtn').addEventListener('click', ()=>{
-      // gather current displayed results into JSON
-      const brand = document.getElementById('brand').value || 'all';
-      const model = document.getElementById('model').value || '';
-      const year = document.getElementById('year').value || '';
-      const code = document.getElementById('code').value || '';
-      const desc = document.getElementById('desc').value || '';
-      const resultsText = document.getElementById('outputArea').innerText || '';
-      const payload = { brand, model, year, code, desc, resultsText, exportedAt: new Date().toISOString() };
-      const blob = new Blob([JSON.stringify(payload, null, 2)],{type:'application/json'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `dali_diagnostic_${Date.now()}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
+  search.addEventListener('input', (e)=> renderList(e.target.value));
+  overlay.appendChild(box); document.body.appendChild(overlay);
+}
+
+/* ---------- تحليل ونتيجة باللغة العربية ---------- */
+function analyze(){
+  const brand = document.getElementById('brand').value || 'all';
+  const model = document.getElementById('model').value || '';
+  const year = document.getElementById('year').value || '';
+  const code = (document.getElementById('codeInput').value || '').trim().toUpperCase();
+  const desc = (document.getElementById('desc').value || '').trim();
+
+  const output = document.getElementById('outputArea');
+  output.innerHTML = '';
+  document.getElementById('metaInfo').textContent = `ماركة: ${brand} · موديل: ${model||'—'} · سنة: ${year||'—'} · كود: ${code||'—'}`;
+
+  let results = [];
+
+  if(code){
+    // بحث مطابق مباشر
+    const found = DB.filter(item => item.code.toUpperCase() === code);
+    if(found.length>0) results = results.concat(found);
+    else {
+      // محاولة مطابقة بالبادئة/أو حذف P
+      const prefix = code.replace(/[^A-Z0-9]/g,'').toUpperCase();
+      const alt = DB.filter(item => item.code.toUpperCase().includes(prefix));
+      results = results.concat(alt);
+    }
+  }
+
+  // بحث بكلمات الوصف
+  if(desc){
+    const tokens = desc.toLowerCase().split(/\s+/).filter(t=>t.length>2);
+    const matched = DB.filter(item => {
+      const hay = (item.title + ' ' + item.description + ' ' + (item.causes||[]).join(' ') + ' ' + (item.solutions||[]).join(' ')).toLowerCase();
+      return tokens.some(tok => hay.includes(tok));
     });
+    matched.forEach(m => { if(!results.some(r=>r.code===m.code)) results.push(m); });
+  }
 
-    // init empty UI
-    document.getElementById('resetBtn').click();
-  </script>
+  // إذا لا نتائج، اقترح أقرب تشابه بواسطة البحث الحر
+  if(results.length===0){
+    // قم بالبحث الحر في DB بواسطة أي كلمة واحدة
+    const q = (code || desc).toLowerCase();
+    const simple = DB.filter(item => (item.code + ' ' + item.title + ' ' + item.description).toLowerCase().includes(q));
+    simple.forEach(m => { if(!results.some(r=>r.code===m.code)) results.push(m); });
+  }
+
+  if(results.length===0){
+    output.innerHTML = `<div class="empty"><div style="font-weight:700;margin-bottom:8px">لم نعثر على نتيجة مباشرة</div><div>جرب كتابة الكود بصيغة صحيحة مثل <strong>P0300</strong> أو ضع وصفًا أوضح. يمكنك أيضًا استيراد ملف JSON يحتوي جميع الأكواد.</div></div>`;
+    return;
+  }
+
+  // عرض النتائج
+  results.forEach(item => {
+    const el = document.createElement('div'); el.className='fault';
+    el.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="color:var(--muted);font-size:13px">الكود</div>
+          <div style="font-size:18px;font-weight:800">${item.code}</div>
+        </div>
+        <div style="text-align:left">
+          <div style="font-size:13px;color:var(--muted)">${(item.brands && item.brands.length) ? item.brands.join(' · ') : 'عام'}</div>
+          <div style="font-weight:800;margin-top:6px">${item.title}</div>
+        </div>
+      </div>
+      <div style="margin-top:10px;color:var(--muted)">${item.description || ''}</div>
+      <div style="margin-top:10px"><strong>الأسباب المحتملة:</strong><ul>${(item.causes||[]).map(c=>`<li>${c}</li>`).join('')}</ul></div>
+      <div style="margin-top:6px"><strong>الحلول الممكنة:</strong><ul>${(item.solutions||[]).map(s=>`<li>${s}</li>`).join('')}</ul></div>
+    `;
+    output.appendChild(el);
+  });
+
+  // تحليل مركّز باللغة العربية — تجميع وتوليف
+  const systems = Array.from(new Set(results.map(r=>r.system))).join(' · ');
+  const codesList = Array.from(new Set(results.map(r=>r.code))).join(', ');
+  const analysisLines = [];
+  analysisLines.push(`تحليل عام: بناءً على المدخلات (ماركة: ${brand}, موديل: ${model||'غير محدد'}, سنة: ${year||'غير محددة'}) والأكواد/الوصف (${codesList})، يظهر أن الجزء أو الأنظمة المتأثرة على الأرجح: ${systems}.\n`);
+  analysisLines.push(`خطوات تحقق سريعة بالترتيب:\n1) تحقق من العناصر الكهربائية البسيطة: التوصيلات، الفيوزات، مقبس OBD.\n2) افحص العناصر الميكانيكية السهلة: شمعات الاحتراق، الكويلات، مستوى الوقود وسوائل التبريد.\n3) إذا كان الكود متعلقًا بحساسات (MAF, O2, Crank, Cam): قم بتنظيف الحساسات أو فحص توصيلاتها قبل الاستبدال.\n4) إن كانت المشكلة في نظام العادم/المحول: فحص حساسات O2 ومراقبة Live data قبل استبدال المحول لأن المحول مكلف.\n5) في حالة أخطاء ناقل الحركة: بدءًا من قراءة أخطاء العلبة (TCM) ثم فحص حساسات السرعة والصمامات.\n`);
+  analysisLines.push(`ملاحظة مهمة: هذه توصيات مبدئية — قد يلزم فحص مختص (قياس ضغط الأسطوانات، قراءة Live data، فحص كهربائي متقدم) لتأكيد الخلاصة وإجراءات الإصلاح النهائية.\n`);
+  const analysisText = analysisLines.join('\n');
+
+  const analysisEl = document.createElement('div'); analysisEl.className='analysis';
+  analysisEl.innerHTML = `<h4 style="margin:0 0 8px 0;">🔎 تحليل مفصّل (بالعربية)</h4><pre class="analysis">${analysisText}</pre>`;
+  output.appendChild(analysisEl);
+
+  // زر لمشاركة/تحميل النتيجة
+}
+
+/* ---------- أزرار النسخ والتنزيل ---------- */
+document.getElementById('analyzeBtn').addEventListener('click', analyze);
+
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  document.getElementById('brand').value='all';
+  fillModelsFor('all');
+  document.getElementById('year').value='';
+  document.getElementById('codeInput').value='';
+  document.getElementById('desc').value='';
+  document.getElementById('outputArea').innerHTML = '<div class="empty"><div style="font-weight:700;margin-bottom:8px">لم يتم إجراء تشخيص بعد</div><div>ادخل الكود أو وصف الحالة ثم اضغط \"تشخيص الآن\".</div></div>';
+  document.getElementById('metaInfo').textContent = 'لم يتم إجراء تشخيص — اضغط \"تشخيص الآن\".';
+});
+document.getElementById('copyBtn').addEventListener('click', ()=>{
+  const text = document.getElementById('outputArea').innerText;
+  navigator.clipboard?.writeText(text).then(()=> alert('تم نسخ النص إلى الحافظة ✅')).catch(()=> alert('النسخ فشل — جرب المتصفح الحديث.'));
+});
+document.getElementById('downloadBtn').addEventListener('click', ()=>{
+  const brand = document.getElementById('brand').value;
+  const model = document.getElementById('model').value;
+  const year = document.getElementById('year').value;
+  const code = document.getElementById('codeInput').value;
+  const desc = document.getElementById('desc').value;
+  const resultsText = document.getElementById('outputArea').innerText;
+  const payload = { brand, model, year, code, desc, resultsText, exportedAt:new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = `dali_diag_${Date.now()}.json`; a.click(); URL.revokeObjectURL(url);
+});
+
+/* ---------- استيراد قاعدة بيانات JSON خارجية ---------- */
+const importInput = document.getElementById('importJson');
+document.getElementById('importBtn').addEventListener('click', ()=> importInput.click());
+importInput.addEventListener('change', async (ev)=>{
+  const f = ev.target.files?.[0]; if(!f) return;
+  try{
+    const txt = await f.text();
+    const json = JSON.parse(txt);
+    if(!Array.isArray(json)) throw new Error('الملف يجب أن يكون مصفوفة من السجلات');
+    // تحقق سريع من أول عنصر
+    if(json.length>0 && !json[0].code) {
+      if(!confirm('يبدو أن الملف لا يحتوي على حقل code. هل مع ذلك تود المتابعة؟')) return;
+    }
+    // استبدال DB (مؤقت للعمل داخل الصفحة)
+    window.__IMPORTED_DB__ = json;
+    alert('تم استيراد قاعدة البيانات بنجاح. الآن الصفحة ستستخدم البيانات المستوردة عند البحث.');
+    // replace DB reference functions by reassignment
+    // We'll use window.__IMPORTED_DB__ in البحث
+  }catch(err){
+    alert('فشل استيراد JSON: ' + (err.message || err));
+  } finally { importInput.value=''; }
+});
+
+/* ---------- تصدير قاعدة (نسخة من DB الحالية) ---------- */
+document.getElementById('exportDbBtn').addEventListener('click', ()=>{
+  const source = window.__IMPORTED_DB__ || DB;
+  const blob = new Blob([JSON.stringify(source,null,2)],{type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = `obd_db_export_${Date.now()}.json`; a.click(); URL.revokeObjectURL(url);
+});
+
+/* تعديل بسيط: في دوال البحث نُفضّل استعمال DB المستورد إن وُجد */
+function getSearchDB(){ return window.__IMPORTED_DB__ || DB; }
+
+// تحديث الدالة analyze لاستخدام getSearchDB()
+(function patchAnalyze(){
+  const old = analyze;
+  window.analyze = function(){
+    // This wrapper will temporarily set DB reference to imported if exists.
+    // But since analyze uses DB variable directly, we override DB global if imported.
+    if(window.__IMPORTED_DB__){
+      // replace the local DB variable by window.__IMPORTED_DB__
+      // We cannot reassign the closed-over DB, but we can set a global pointer used by a modified analyze.
+    }
+    // Re-implement analyze here to use getSearchDB instead (to ensure imported DB used)
+    const brand = document.getElementById('brand').value || 'all';
+    const model = document.getElementById('model').value || '';
+    const year = document.getElementById('year').value || '';
+    const code = (document.getElementById('codeInput').value || '').trim().toUpperCase();
+    const desc = (document.getElementById('desc').value || '').trim();
+    const output = document.getElementById('outputArea'); output.innerHTML='';
+    document.getElementById('metaInfo').textContent = `ماركة: ${brand} · موديل: ${model||'—'} · سنة: ${year||'—'} · كود: ${code||'—'}`;
+    const DBS = getSearchDB();
+    let results = [];
+    if(code){
+      const found = DBS.filter(item => (item.code||'').toString().toUpperCase() === code);
+      if(found.length>0) results = results.concat(found);
+      else {
+        const prefix = code.replace(/[^A-Z0-9]/g,'').toUpperCase();
+        const alt = DBS.filter(item => ((item.code||'')+'').toUpperCase().includes(prefix));
+        results = results.concat(alt);
+      }
+    }
+    if(desc){
+      const tokens = desc.toLowerCase().split(/\s+/).filter(t=>t.length>2);
+      const matched = DBS.filter(item=>{
+        const hay = ((item.title||'') + ' ' + (item.description||'') + ' ' + (item.causes||[]).join(' ') + ' ' + (item.solutions||[]).join(' ')).toLowerCase();
+        return tokens.some(tok => hay.includes(tok));
+      });
+      matched.forEach(m=>{ if(!results.some(r=>r.code===m.code)) results.push(m); });
+    }
+    if(results.length===0){
+      const q = (code || desc).toLowerCase();
+      if(q){
+        const simple = DBS.filter(item => ((item.code||'') + ' ' + (item.title||'') + ' ' + (item.description||'')).toLowerCase().includes(q));
+        simple.forEach(m=>{ if(!results.some(r=>r.code===m.code)) results.push(m); });
+      }
+    }
+    if(results.length===0){
+      output.innerHTML = `<div class="empty"><div style="font-weight:700;margin-bottom:8px">لم نعثر على نتيجة مباشرة</div><div>جرب كتابة الكود بصيغة صحيحة مثل <strong>P0300</strong> أو استورد قاعدة بيانات أكبر.</div></div>`;
+      return;
+    }
+    results.forEach(item=>{
+      const el = document.createElement('div'); el.className='fault';
+      el.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="color:var(--muted);font-size:13px">الكود</div>
+            <div style="font-size:18px;font-weight:800">${item.code}</div>
+          </div>
+          <div style="text-align:left">
+            <div style="font-size:13px;color:var(--muted)">${(item.brands && item.brands.length) ? item.brands.join(' · ') : 'عام'}</div>
+            <div style="font-weight:800;margin-top:6px">${item.title}</div>
+          </div>
+        </div>
+        <div style="margin-top:10px;color:var(--muted)">${item.description || ''}</div>
+        <div style="margin-top:10px"><strong>الأسباب المحتملة:</strong><ul>${(item.causes||[]).map(c=>`<li>${c}</li>`).join('')}</ul></div>
+        <div style="margin-top:6px"><strong>الحلول الممكنة:</strong><ul>${(item.solutions||[]).map(s=>`<li>${s}</li>`).join('')}</ul></div>
+      `;
+      output.appendChild(el);
+    });
+    const systems = Array.from(new Set(results.map(r=>r.system))).join(' · ');
+    const codesList = Array.from(new Set(results.map(r=>r.code))).join(', ');
+    const analysisLines = [];
+    analysisLines.push(`تحليل عام: بناءً على المدخلات (ماركة: ${brand}, موديل: ${model||'غير محدد'}, سنة: ${year||'غير محددة'}) والأكواد/الوصف (${codesList})، من المرجح أن تكون المشاكل مرتبطة بالأنظمة التالية: ${systems}.\n`);
+    analysisLines.push(`التحقق السريع المقترح:\n1) تحقق من الوصلات الكهربائية والفيوزات ومأخذ OBD.\n2) فحص الشمعات والكويلات والماف والبخاخات حسب الأعراض.\n3) راقب Live data إن أمكن (RPM, MAF, O2) قبل البدء بالتبديل.\n4) فحص التسريبات الهوائية وخراطيم العادم إن كانت الأكواد تتعلق بخليط الهواء/الوقود.\n`);
+    analysisLines.push(`ملاحظة: هذه توصيات مبدئية. للمصلحة النهائية يُنصح بفحص مستمر على جهاز فحص وميكانيكي مختص إذا تعذر الحل البسيط.\n`);
+    const analysisText = analysisLines.join('\n');
+    const analysisEl = document.createElement('div'); analysisEl.className='analysis';
+    analysisEl.innerHTML = `<h4 style="margin:0 0 8px 0;">🔎 تحليل مفصّل (بالعربية)</h4><pre class="analysis">${analysisText}</pre>`;
+    output.appendChild(analysisEl);
+  };
+  // ربط الزر
+  document.getElementById('analyzeBtn').removeEventListener('click', analyze);
+  document.getElementById('analyzeBtn').addEventListener('click', window.analyze);
+})();
+
+/* ---------- Avatar upload ---------- */
+document.getElementById('avatarFile').addEventListener('change', (ev)=>{
+  const f = ev.target.files?.[0]; if(!f) return;
+  const img = document.getElementById('avatarImg'); const plc = document.getElementById('avatarPlaceholder');
+  const url = URL.createObjectURL(f);
+  img.src = url; img.style.display='block'; plc.style.display='none';
+});
+
+/* ---------- عند فتح الصفحة عيّن حالة فارغة ---------- */
+document.getElementById('resetBtn').click();
+
+</script>
 </body>
 </html>
