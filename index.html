@@ -7,15 +7,15 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary: #1a5276;
-            --secondary: #e67e22;
-            --accent: #27ae60;
-            --light: #ecf0f1;
-            --dark: #2c3e50;
+            --primary: #8e44ad;
+            --secondary: #f1c40f;
+            --accent: #e67e22;
+            --dark: #1a1a1a;
+            --light: #f8f9fa;
             --danger: #e74c3c;
-            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            --card-bg: #fff;
-            --header-bg: linear-gradient(135deg, #1a5276 0%, #2c3e50 100%);
+            --success: #2ecc71;
+            --card-bg: #2d2d2d;
+            --header-bg: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
         }
         
         * {
@@ -26,8 +26,8 @@
         }
         
         body {
-            background: #f5f7fa;
-            color: #333;
+            background: var(--dark);
+            color: var(--light);
             min-height: 100vh;
             padding: 20px;
         }
@@ -43,45 +43,51 @@
             border-radius: 15px;
             padding: 20px;
             margin-bottom: 25px;
-            box-shadow: var(--shadow);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
             text-align: center;
             position: relative;
+            border: 1px solid #8e44ad;
         }
         
         .developer-profile {
-            position: absolute;
-            left: 20px;
-            top: 20px;
             display: flex;
             align-items: center;
-            background: rgba(255, 255, 255, 0.2);
-            padding: 10px 15px;
+            justify-content: center;
+            background: rgba(142, 68, 173, 0.2);
+            padding: 10px 20px;
             border-radius: 50px;
+            margin: 15px auto;
+            width: fit-content;
             backdrop-filter: blur(5px);
+            border: 2px solid var(--primary);
         }
         
         .developer-img {
-            width: 60px;
-            height: 60px;
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
             object-fit: cover;
-            border: 3px solid white;
-            margin-left: 10px;
+            border: 3px solid var(--secondary);
+            margin-left: 15px;
+            box-shadow: 0 0 15px rgba(241, 196, 15, 0.5);
         }
         
         .developer-info {
             color: white;
-            text-align: right;
+            text-align: center;
         }
         
         .developer-info h3 {
-            font-size: 1rem;
-            margin-bottom: 3px;
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+            color: var(--secondary);
         }
         
         .developer-info p {
-            font-size: 0.8rem;
+            font-size: 0.9rem;
             opacity: 0.9;
+            color: var(--primary);
+            font-weight: bold;
         }
         
         .logo {
@@ -101,10 +107,11 @@
             color: white;
             font-size: 2.2rem;
             margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
         }
         
         .subtitle {
-            color: #ecf0f1;
+            color: #bbb;
             font-size: 1.2rem;
             margin-bottom: 20px;
         }
@@ -125,21 +132,23 @@
             background: var(--card-bg);
             border-radius: 15px;
             padding: 25px;
-            box-shadow: var(--shadow);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border: 1px solid #444;
         }
         
         .card-title {
-            color: var(--primary);
+            color: var(--secondary);
             margin-bottom: 20px;
             padding-bottom: 10px;
-            border-bottom: 2px solid var(--secondary);
+            border-bottom: 2px solid var(--primary);
             display: flex;
             align-items: center;
+            font-size: 1.4rem;
         }
         
         .card-title i {
             margin-left: 10px;
-            color: var(--secondary);
+            color: var(--accent);
         }
         
         .form-group {
@@ -150,26 +159,28 @@
             display: block;
             margin-bottom: 8px;
             font-weight: 600;
-            color: var(--dark);
+            color: var(--secondary);
         }
         
         input, select, textarea {
             width: 100%;
             padding: 12px 15px;
-            border: 2px solid #ddd;
+            background: #3a3a3a;
+            border: 2px solid #555;
             border-radius: 8px;
             font-size: 16px;
             transition: all 0.3s;
+            color: var(--light);
         }
         
         input:focus, select:focus, textarea:focus {
             border-color: var(--primary);
             outline: none;
-            box-shadow: 0 0 0 3px rgba(26, 82, 118, 0.2);
+            box-shadow: 0 0 0 3px rgba(142, 68, 173, 0.3);
         }
         
         button {
-            background: linear-gradient(to right, var(--primary), var(--secondary));
+            background: linear-gradient(to right, var(--primary), var(--accent));
             color: white;
             border: none;
             padding: 15px 25px;
@@ -179,12 +190,12 @@
             font-weight: 600;
             transition: all 0.3s;
             width: 100%;
-            box-shadow: var(--shadow);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
         }
         
         button:hover {
             transform: translateY(-3px);
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
         }
         
         button:active {
@@ -195,9 +206,9 @@
             display: none;
             margin-top: 20px;
             padding: 20px;
-            background: var(--light);
+            background: #3a3a3a;
             border-radius: 10px;
-            border-right: 4px solid var(--secondary);
+            border-right: 4px solid var(--primary);
         }
         
         .error-title {
@@ -205,33 +216,35 @@
             margin-bottom: 15px;
             display: flex;
             align-items: center;
+            font-size: 1.2rem;
         }
         
         .solution-title {
-            color: var(--accent);
+            color: var(--success);
             margin-top: 20px;
             margin-bottom: 15px;
             display: flex;
             align-items: center;
+            font-size: 1.2rem;
         }
         
         .error-item, .solution-item {
             margin-bottom: 10px;
             padding: 12px;
-            background: white;
+            background: #444;
             border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
             border-left: 3px solid var(--danger);
         }
         
         .solution-item {
-            border-left: 3px solid var(--accent);
+            border-left: 3px solid var(--success);
         }
         
         .history-item {
             padding: 15px;
             margin-bottom: 15px;
-            background: var(--light);
+            background: #3a3a3a;
             border-radius: 8px;
             border-right: 3px solid var(--primary);
             cursor: pointer;
@@ -239,7 +252,7 @@
         }
         
         .history-item:hover {
-            background: #dfe6e9;
+            background: #444;
             transform: translateX(-5px);
         }
         
@@ -247,7 +260,7 @@
             text-align: center;
             margin-top: 50px;
             padding: 20px;
-            color: var(--dark);
+            color: #bbb;
             font-size: 0.9rem;
         }
         
@@ -258,7 +271,7 @@
         }
         
         .loading-spinner {
-            border: 4px solid #f3f3f3;
+            border: 4px solid rgba(255, 255, 255, 0.1);
             border-top: 4px solid var(--primary);
             border-radius: 50%;
             width: 40px;
@@ -272,27 +285,47 @@
             100% { transform: rotate(360deg); }
         }
         
-        @media (max-width: 768px) {
-            .developer-profile {
-                position: relative;
-                left: 0;
-                top: 0;
-                justify-content: center;
-                margin: 15px auto;
-                width: fit-content;
-            }
-            
-            header {
-                padding-bottom: 30px;
-            }
+        .code-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .code-item {
+            background: linear-gradient(to bottom, var(--primary), #6c3483);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid #8e44ad;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .code-item:hover {
+            background: linear-gradient(to bottom, var(--accent), #d35400);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
         }
         
         .car-brand {
             font-weight: bold;
-            color: var(--primary);
+            color: var(--secondary);
             margin-top: 10px;
             padding-bottom: 5px;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid #555;
+        }
+        
+        .obd-codes-container {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 15px;
+            padding: 10px;
+            background: #3a3a3a;
+            border-radius: 8px;
+            border: 1px solid #555;
         }
     </style>
 </head>
@@ -300,11 +333,11 @@
     <div class="container">
         <header>
             <div class="developer-profile">
+                <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" alt="صورة المطور" class="developer-img">
                 <div class="developer-info">
                     <h3>دالي نجيب</h3>
                     <p>AI Developer</p>
                 </div>
-                <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" alt="صورة المطور" class="developer-img">
             </div>
             
             <div class="logo">
@@ -366,6 +399,38 @@
                 <div class="form-group">
                     <label for="errorCode">أكواد الأعطال (اختياري)</label>
                     <input type="text" id="errorCode" placeholder="أدخل كود العطل مثل P0300 (يفصل بينها بفاصلة)">
+                    
+                    <div class="obd-codes-container">
+                        <div class="car-brand">أكواد OBD شائعة:</div>
+                        <div class="code-list">
+                            <div class="code-item" data-code="P0100">P0100</div>
+                            <div class="code-item" data-code="P0200">P0200</div>
+                            <div class="code-item" data-code="P0300">P0300</div>
+                            <div class="code-item" data-code="P0301">P0301</div>
+                            <div class="code-item" data-code="P0400">P0400</div>
+                            <div class="code-item" data-code="P0500">P0500</div>
+                            <div class="code-item" data-code="P0600">P0600</div>
+                            <div class="code-item" data-code="P0700">P0700</div>
+                            <div class="code-item" data-code="P0800">P0800</div>
+                            <div class="code-item" data-code="P0900">P0900</div>
+                            <div class="code-item" data-code="P1000">P1000</div>
+                            <div class="code-item" data-code="P1100">P1100</div>
+                            <div class="code-item" data-code="P1200">P1200</div>
+                            <div class="code-item" data-code="P1300">P1300</div>
+                            <div class="code-item" data-code="P1400">P1400</div>
+                            <div class="code-item" data-code="P1500">P1500</div>
+                            <div class="code-item" data-code="P1600">P1600</div>
+                            <div class="code-item" data-code="P1700">P1700</div>
+                            <div class="code-item" data-code="P1800">P1800</div>
+                            <div class="code-item" data-code="P1900">P1900</div>
+                            <div class="code-item" data-code="P2000">P2000</div>
+                            <div class="code-item" data-code="P2100">P2100</div>
+                            <div class="code-item" data-code="P2200">P2200</div>
+                            <div class="code-item" data-code="P2300">P2300</div>
+                            <div class="code-item" data-code="P2400">P2400</div>
+                            <div class="code-item" data-code="P2500">P2500</div>
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="form-group">
@@ -458,44 +523,72 @@
             }
         });
         
+        // إضافة أكواد الأعطال الشائعة
+        document.querySelectorAll('.code-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const code = this.getAttribute('data-code');
+                const currentCode = document.getElementById('errorCode').value;
+                
+                if (currentCode) {
+                    document.getElementById('errorCode').value = currentCode + ', ' + code;
+                } else {
+                    document.getElementById('errorCode').value = code;
+                }
+            });
+        });
+        
         // قاعدة بيانات محاكاة للأعطال والحلول
         const errorDatabase = {
             // أعطال المحرك
+            'P0100': {
+                description: 'خلل في دائرة مقياس تدفق الهواء/حساس تدفق الهواء',
+                causes: ['حساس تدفق الهواء تالف', 'أسلاك توصيل الحساس تالفة', 'مشكلة في موصل الحساس'],
+                solutions: ['فحص واستبدال حساس تدفق الهواء', 'فحص أسلاك التوصيل وإصلاحها', 'فحص وتنظيف موصل الحساس']
+            },
+            'P0200': {
+                description: 'خلل في دائرة حاقن الوقود',
+                causes: ['حاقن الوقود تالف', 'أسلاك توصيل الحاقن تالفة', 'مشكلة في وحدة التحكم'],
+                solutions: ['فحص واستبدال حاقن الوقود', 'فحص أسلاك التوصيل وإصلاحها', 'فحص وحدة التحكم']
+            },
             'P0300': {
-                description: 'خلل في اشتعال المحرك - احتراق غير منتظم',
-                causes: ['شمعات الإشعال تالفة', 'أسلاك البواجي تالفة', 'مشكلة في نظام الوقود', 'ضعف في ضغط المحرك'],
-                solutions: ['فحص واستبدال شمعات الإشعال', 'فحص واستبدال أسلاك البواجي', 'فحص مضخة الوقود وفلتر الوقود', 'فحص ضغط المحرك']
+                description: 'اشتعال غير منتظم في المحرك',
+                causes: ['شمعات الإشعال تالفة', 'أسلاك البواجي تالفة', 'مشكلة في ملف الإشعال', 'ضعف ضغط الوقود'],
+                solutions: ['فحص واستبدال شمعات الإشعال', 'فحص أسلاك البواجي', 'اختبار ملف الإشعال', 'فحص ضغط الوقود']
             },
-            'P0171': {
-                description: 'خلل في خليط الوقود (فقير جداً)',
-                causes: ['تسرب في نظام السحب', 'مشكلة في حساس الأكسجين', 'مشكلة في حساس تدفق الهواء', 'مضخة وقود ضعيفة'],
-                solutions: ['فحص نظام السحب للتأكد من عدم وجود تسريب', 'فحص واستبدال حساس الأكسجين إذا necessário', 'فحص حساس تدفق الهواء', 'فحص ضغط الوقود']
+            'P0301': {
+                description: 'اشتعال غير منتظم في الأسطوانة رقم 1',
+                causes: ['شمعة الإشعال في الأسطوانة 1 تالفة', 'خلل في ملف الإشعال للأسطوانة 1', 'مشكلة في حاقن الوقود للأسطوانة 1'],
+                solutions: ['فحص واستبدال شمعة الإشعال في الأسطوانة 1', 'اختبار ملف الإشعال للأسطوانة 1', 'فحص وتنظيف حاقن الوقود للأسطوانة 1']
             },
-            'P0420': {
-                description: 'كفاءة المحفز الحفاز below threshold',
-                causes: ['المحفز الحفاز تالف', 'مشكلة في حساس الأكسجين', 'تسريب في العادم'],
-                solutions: ['فحص واستبدال المحفز الحفاز إذا necessário', 'فحص حساسات الأكسجين', 'فحص نظام العادم للتأكد من عدم وجود تسريب']
+            'P0400': {
+                description: 'خلل في تدفق نظام EGR',
+                causes: ['صمام EGR مسدود', 'أنابيب EGR مسدودة', 'مشكلة في التحكم بصمام EGR'],
+                solutions: ['تنظيف أو استبدال صمام EGR', 'فحص وتنظيف أنابيب EGR', 'فحص دائرة التحكم بصمام EGR']
             },
-            
-            // أعطال ناقل الحركة
+            'P0500': {
+                description: 'خلل في حساس سرعة المركبة',
+                causes: ['حساس سرعة المركبة تالف', 'أسلاك التوصيل تالفة', 'مشكلة في وحدة التحكم'],
+                solutions: ['فحص واستبدال حساس سرعة المركبة', 'فحص أسلاك التوصيل وإصلاحها', 'فحص وحدة التحكم']
+            },
+            'P0600': {
+                description: 'خلل في وحدة التحكم الإلكترونية',
+                causes: ['وحدة التحكم تالفة', 'مشكلة في برمجة الوحدة', 'مشكلة في التوصيلات'],
+                solutions: ['فحص واستبدال وحدة التحكم', 'إعادة برمجة وحدة التحكم', 'فحص التوصيلات وإصلاحها']
+            },
             'P0700': {
                 description: 'خلل في نظام ناقل الحركة',
                 causes: ['低 مستوى زيت ناقل الحركة', 'مشكلة في صمامات ناقل الحركة', 'خلل في وحدة التحكم بناقل الحركة'],
                 solutions: ['فحص مستوى زيت ناقل الحركة', 'فحص صمامات ناقل الحركة', 'فحص وحدة التحكم بناقل الحركة']
             },
-            
-            // أعطال المكيف
-            'AC001': {
-                description: 'ضعف تبريد المكيف',
-                causes: ['نقص في غاز التبريد', 'مشكلة في ضاغط المكيف', 'انسداد في دائرة التبريد'],
-                solutions: ['فحص مستوى غاز التبريد وإعادة الملء إذا necessário', 'فحص ضاغط المكيف', 'تنظيف دائرة التبريد']
+            'P0800': {
+                description: 'خلل في نظام القابض',
+                causes: ['القابض تالف', 'مشكلة في دواسة القابض', 'مشكلة في وحدة التحكم'],
+                solutions: ['فحص واستبدال القابض', 'فحص دواسة القابض', 'فحص وحدة التحكم']
             },
-            
-            // أعطال الفرامل
-            'BR001': {
-                description: 'ضعف في كفاءة الفرامل',
-                causes: ['تآكل في تيل الفرامل', 'نقص في سائل الفرامل', 'تلف في اسطوانات الفرامل'],
-                solutions: ['فحص واستبدال تيل الفرامل', 'فحص وإضافة سائل الفرامل', 'فحص اسطوانات الفرامل']
+            'P0900': {
+                description: 'خلل في نظام التعشيق',
+                causes: ['نظام التعشيق تالف', 'مشكلة في وحدة التحكم', 'مشكلة في التوصيلات'],
+                solutions: ['فحص وإصلاح نظام التعشيق', 'فحص وحدة التحكم', 'فحص التوصيلات وإصلاحها']
             }
         };
         
