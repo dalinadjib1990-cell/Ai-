@@ -1,581 +1,951 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Dali Nadjib AI Voiture — تشخيص OBD شامل (200 كود)</title>
-<style>
-:root{
-  --bg:#05060a; --muted:#9aa4b2; --accent1:#ff6b6b; --accent2:#7c5cff; --accent3:#00d4ff; --glass:rgba(255,255,255,0.03); --radius:12px;
-}
-*{box-sizing:border-box;font-family: "Segoe UI", Roboto, "Noto Sans", Arial, sans-serif;}
-body{ margin:0; min-height:100vh; background:
-  radial-gradient(900px 400px at 8% 10%, rgba(124,92,255,0.08), transparent 6%),
-  radial-gradient(700px 300px at 92% 90%, rgba(0,212,255,0.03), transparent 6%),
-  var(--bg); color:#eaf4ff; padding:18px;}
-.container{ max-width:1200px; margin:0 auto; display:grid; grid-template-columns:380px 1fr; gap:18px; align-items:start;}
-.card{ background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); padding:16px; border-radius:var(--radius); border:1px solid rgba(255,255,255,0.04); }
-.header{ display:flex; gap:12px; align-items:center; margin-bottom:8px;}
-.appBadge{ background:linear-gradient(90deg,var(--accent2),var(--accent3)); color:#020617; padding:8px 12px; border-radius:12px; font-weight:800;}
-.title{ font-size:18px; font-weight:800;}
-.lead{ color:var(--muted); font-size:13px; margin:6px 0 12px 0;}
-label{ display:block; color:var(--muted); font-size:13px; margin:10px 0 6px 0;}
-input[type="text"], select, textarea { width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.04); background:var(--glass); color:inherit; outline:none; font-size:14px;}
-textarea{ min-height:90px; resize:vertical;}
-.row{ display:flex; gap:8px;}
-.btn{ padding:10px 12px; border-radius:10px; border:none; cursor:pointer; font-weight:800;}
-.btn-primary{ background:linear-gradient(90deg,var(--accent2),var(--accent1)); color:#04040a;}
-.btn-ghost{ background:transparent; border:1px solid rgba(255,255,255,0.04); color:var(--muted);}
-.small{ font-size:12px; color:var(--muted); margin-top:8px;}
-.avatar{ width:72px; height:72px; border-radius:12px; overflow:hidden; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.04); font-weight:800; color:var(--muted);}
-.outputs{ display:flex; flex-direction:column; gap:12px;}
-.resHead{ display:flex; justify-content:space-between; align-items:center; gap:10px;}
-.badge{ padding:8px 12px; border-radius:999px; background:linear-gradient(90deg,var(--accent3),var(--accent2)); color:#071122; font-weight:900;}
-.meta{ color:var(--muted); font-size:13px;}
-.resultCard{ padding:14px; border-radius:12px; background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005)); border:1px solid rgba(255,255,255,0.02);}
-.fault{ border-radius:10px; padding:12px; margin-bottom:10px; background: linear-gradient(90deg, rgba(124,92,255,0.04), rgba(0,212,255,0.02)); border:1px solid rgba(124,92,255,0.06);}
-.analysis{ background:rgba(0,0,0,0.16); padding:12px; border-radius:10px; color:#dfeeff;}
-.modal-overlay{ position:fixed; inset:0; background:rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center; z-index:9999;}
-.modal{ width:80%; max-width:980px; max-height:80vh; overflow:auto; background:linear-gradient(180deg,#07101a,#071018); padding:12px; border-radius:10px; border:1px solid rgba(255,255,255,0.04); }
-.list-row{ padding:10px; border-bottom:1px solid rgba(255,255,255,0.02); cursor:pointer;}
-.empty{ text-align:center; color:var(--muted); padding:18px; border-radius:10px; border:1px dashed rgba(255,255,255,0.03);}
-.footer-note{ text-align:center; color:var(--muted); margin-top:12px; font-size:13px;}
-@media(max-width:980px){ .container{ grid-template-columns:1fr; padding:10px; } }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>dali nadjib ai auto - تشخيص السيارات</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'arabic': ['Noto Sans Arabic', 'Arial', 'sans-serif']
+                    },
+                    colors: {
+                        primary: '#00D4FF',
+                        secondary: '#FF6B35',
+                        accent: '#FFD23F',
+                        success: '#06D6A0',
+                        warning: '#F72585',
+                        dark: '#0A0A0A',
+                        'dark-light': '#1A1A1A',
+                        'dark-lighter': '#2A2A2A'
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
-<body>
-  <div class="container">
-    <!-- LEFT: FORM -->
-    <aside class="card" aria-labelledby="appTitle">
-      <div class="header">
-        <div class="avatar" id="avatarBox">D N</div>
-        <div>
-          <div class="appBadge">Dali Nadjib AI</div>
-          <div class="title" id="appTitle">تشخيص أعطال السيارات — OBD</div>
-          <div class="lead">كل شيء بالعربية — اختر أو اكتب الكود واحصل على تحليل وحلول.</div>
+<body class="bg-dark text-white font-arabic min-h-screen">
+    <!-- Header -->
+    <header class="bg-dark-light border-b border-primary/20 p-4">
+        <div class="container mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-reverse space-x-3">
+                <div class="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
+                    <i class="fas fa-car text-white text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-primary">dali nadjib ai auto</h1>
+                    <p class="text-sm text-gray-400">نظام تشخيص السيارات الذكي</p>
+                </div>
+            </div>
+            <div class="text-accent">
+                <i class="fas fa-tools text-2xl"></i>
+            </div>
         </div>
-      </div>
+    </header>
 
-      <label>رفع صورة البروفايل (اختياري)</label>
-      <input type="file" id="avatarFile" accept="image/*" />
-      <div class="small">سيتم حفظ الصورة محليًا في المتصفح (جلسة العمل).</div>
+    <div class="container mx-auto p-4 max-w-6xl">
+        <!-- Main Form -->
+        <div class="bg-dark-light rounded-xl p-6 mb-6 border border-primary/20">
+            <h2 class="text-2xl font-bold text-center mb-8 text-primary">
+                <i class="fas fa-search-plus ml-2"></i>
+                تشخيص السيارة
+            </h2>
 
-      <label for="brand">نوع السيارة / الماركة</label>
-      <select id="brand">
-        <option value="all">عام — غير محدد</option>
-        <option value="Renault">Renault</option>
-        <option value="Peugeot">Peugeot</option>
-        <option value="Chery">Chery</option>
-        <option value="Fiat">Fiat</option>
-        <option value="Hyundai">Hyundai</option>
-        <option value="Volkswagen">Volkswagen</option>
-        <option value="BMW">BMW</option>
-        <option value="Other">ماركات أخرى</option>
-      </select>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Car Brand Selection -->
+                <div class="space-y-3">
+                    <label class="block text-lg font-semibold text-accent">
+                        <i class="fas fa-car ml-2"></i>نوع السيارة
+                    </label>
+                    <select id="carBrand" class="w-full p-3 bg-dark-lighter border border-primary/30 rounded-lg text-white text-base focus:border-primary focus:outline-none">
+                        <option value="">اختر نوع السيارة</option>
+                        <option value="renault">🚗 رونو (Renault)</option>
+                        <option value="peugeot">🚗 بيجو (Peugeot)</option>
+                        <option value="citroen">🚗 سيتروين (Citroën)</option>
+                        <option value="dacia">🚗 داسيا (Dacia)</option>
+                        <option value="volkswagen">🚗 فولكس فاغن (Volkswagen)</option>
+                        <option value="ford">🚗 فورد (Ford)</option>
+                        <option value="hyundai">🚗 هيونداي (Hyundai)</option>
+                        <option value="kia">🚗 كيا (Kia)</option>
+                        <option value="toyota">🚗 تويوتا (Toyota)</option>
+                        <option value="nissan">🚗 نيسان (Nissan)</option>
+                        <option value="mercedes">🚗 مرسيدس (Mercedes)</option>
+                        <option value="bmw">🚗 بي ام دبليو (BMW)</option>
+                        <option value="audi">🚗 أودي (Audi)</option>
+                        <option value="opel">🚗 أوبل (Opel)</option>
+                        <option value="fiat">🚗 فيات (Fiat)</option>
+                    </select>
+                </div>
 
-      <label for="model">الموديل</label>
-      <select id="model"></select>
+                <!-- Model Selection -->
+                <div class="space-y-3">
+                    <label class="block text-lg font-semibold text-accent">
+                        <i class="fas fa-cogs ml-2"></i>الموديل
+                    </label>
+                    <select id="carModel" class="w-full p-3 bg-dark-lighter border border-primary/30 rounded-lg text-white text-base focus:border-primary focus:outline-none">
+                        <option value="">اختر الموديل</option>
+                    </select>
+                </div>
 
-      <label for="year">سنة الصنع</label>
-      <input id="year" type="text" placeholder="مثال: 2017" />
+                <!-- Year Selection -->
+                <div class="space-y-3">
+                    <label class="block text-lg font-semibold text-accent">
+                        <i class="fas fa-calendar ml-2"></i>السنة
+                    </label>
+                    <select id="carYear" class="w-full p-3 bg-dark-lighter border border-primary/30 rounded-lg text-white text-base focus:border-primary focus:outline-none">
+                        <option value="">اختر السنة</option>
+                    </select>
+                </div>
+            </div>
 
-      <label for="system">اختر نظام/فئة الأكواد</label>
-      <select id="system">
-        <option value="all">كل الأنظمة</option>
-        <option value="engine">المحرك</option>
-        <option value="fuel">نظام الوقود</option>
-        <option value="ignition">الإشعال</option>
-        <option value="emissions">العادم</option>
-        <option value="transmission">ناقل الحركة</option>
-        <option value="sensors">الحساسات</option>
-        <option value="electrical">الكهرباء</option>
-        <option value="evap">EVAP</option>
-        <option value="safety">السلامة</option>
-      </select>
+            <!-- OBD Code Selection -->
+            <div class="mt-6 space-y-3">
+                <label class="block text-lg font-semibold text-accent">
+                    <i class="fas fa-code ml-2"></i>كود التشخيص OBD
+                </label>
+                <div class="flex flex-col md:flex-row gap-3">
+                    <select id="obdCode" class="flex-1 p-3 bg-dark-lighter border border-primary/30 rounded-lg text-white text-base focus:border-primary focus:outline-none">
+                        <option value="">اختر كود التشخيص</option>
+                    </select>
+                    <input type="text" id="manualCode" placeholder="أو أدخل الكود يدوياً (مثل: P0171)" 
+                           class="flex-1 p-3 bg-dark-lighter border border-primary/30 rounded-lg text-white text-base placeholder-gray-400 focus:border-primary focus:outline-none">
+                </div>
+            </div>
 
-      <label for="codeInput">كود OBD (اكتب أو اختر)</label>
-      <div class="row">
-        <input id="codeInput" type="text" placeholder="مثال: P0300" />
-        <button class="btn btn-ghost" id="openCodesBtn">📂 اختر كود</button>
-      </div>
+            <!-- Diagnosis Type -->
+            <div class="mt-6 space-y-3">
+                <label class="block text-lg font-semibold text-accent">
+                    <i class="fas fa-wrench ml-2"></i>نوع التشخيص
+                </label>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <button class="diagnosis-type-btn p-3 bg-dark-lighter border border-primary/30 rounded-lg hover:bg-primary/20 hover:border-primary transition-all" data-type="all">
+                        <i class="fas fa-car-side block mb-1"></i>الكل
+                    </button>
+                    <button class="diagnosis-type-btn p-3 bg-dark-lighter border border-primary/30 rounded-lg hover:bg-primary/20 hover:border-primary transition-all" data-type="engine">
+                        <i class="fas fa-cog block mb-1"></i>المحرك
+                    </button>
+                    <button class="diagnosis-type-btn p-3 bg-dark-lighter border border-primary/30 rounded-lg hover:bg-primary/20 hover:border-primary transition-all" data-type="transmission">
+                        <i class="fas fa-gear block mb-1"></i>ناقل الحركة
+                    </button>
+                    <button class="diagnosis-type-btn p-3 bg-dark-lighter border border-primary/30 rounded-lg hover:bg-primary/20 hover:border-primary transition-all" data-type="electrical">
+                        <i class="fas fa-bolt block mb-1"></i>الكهرباء
+                    </button>
+                </div>
+            </div>
 
-      <label for="desc">وصف حالة السيارة</label>
-      <textarea id="desc" placeholder="مثال: المحرك يهتز عند التشغيل، ضوء المحرك ثابت"></textarea>
-
-      <div style="display:flex;gap:10px;margin-top:12px;">
-        <button class="btn btn-primary" id="analyzeBtn">🔎 تشخيص الآن</button>
-        <button class="btn btn-ghost" id="resetBtn">♻️ مسح الحقول</button>
-      </div>
-
-      <div style="display:flex;gap:8px;margin-top:12px;">
-        <input id="importJson" type="file" accept="application/json" style="display:none"/>
-        <button class="btn btn-ghost" id="importBtn">📥 استيراد JSON (كل الأكواد)</button>
-      </div>
-
-      <div class="small" style="margin-top:12px;">
-        هذه النسخة تحتوي 200 كود شائع مدمج داخل الملف. لاستيراد قائمة أكبر (آلاف الأكواد) استخدم زر الاستيراد.
-      </div>
-    </aside>
-
-    <!-- RIGHT: OUTPUT -->
-    <main class="card outputs" aria-live="polite">
-      <div class="resHead">
-        <div style="display:flex;gap:12px;align-items:center;">
-          <div class="badge">نتائج التشخيص</div>
-          <div class="meta" id="metaInfo">لم يتم إجراء تشخيص — اضغط "تشخيص الآن".</div>
+            <!-- Diagnose Button -->
+            <div class="mt-8 text-center">
+                <button id="diagnoseBtn" class="bg-gradient-to-r from-primary to-secondary px-8 py-4 rounded-lg text-white font-bold text-lg hover:shadow-lg hover:shadow-primary/50 transition-all transform hover:scale-105">
+                    <i class="fas fa-search-plus ml-2"></i>
+                    تشخيص السيارة
+                </button>
+            </div>
         </div>
-        <div style="display:flex;gap:8px;">
-          <button class="btn btn-ghost" id="copyBtn">📋 نسخ</button>
-          <button class="btn btn-ghost" id="downloadBtn">⬇️ تنزيل JSON</button>
+
+        <!-- Results Section -->
+        <div id="resultsSection" class="hidden">
+            <!-- Loading Animation -->
+            <div id="loadingAnimation" class="bg-dark-light rounded-xl p-8 mb-6 border border-primary/20 text-center">
+                <div class="animate-spin w-16 h-16 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+                <p class="text-lg text-primary">جاري تحليل البيانات...</p>
+                <p class="text-gray-400">يرجى الانتظار</p>
+            </div>
+
+            <!-- Results Display -->
+            <div id="resultsDisplay" class="hidden space-y-6">
+                <!-- Diagnosis Result -->
+                <div class="bg-dark-light rounded-xl p-6 border border-primary/20">
+                    <h3 class="text-xl font-bold text-accent mb-4">
+                        <i class="fas fa-clipboard-check ml-2"></i>نتيجة التشخيص
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="bg-dark-lighter p-4 rounded-lg border-r-4 border-warning">
+                            <h4 class="font-semibold text-white mb-2">العربية الفصحى:</h4>
+                            <p id="diagnosisArabic" class="text-gray-300 leading-relaxed"></p>
+                        </div>
+                        <div class="bg-dark-lighter p-4 rounded-lg border-r-4 border-accent">
+                            <h4 class="font-semibold text-white mb-2">الدارجة الجزائرية:</h4>
+                            <p id="diagnosisAlgerian" class="text-gray-300 leading-relaxed"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Solutions -->
+                <div class="bg-dark-light rounded-xl p-6 border border-primary/20">
+                    <h3 class="text-xl font-bold text-success mb-4">
+                        <i class="fas fa-tools ml-2"></i>الحلول والإصلاحات
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="bg-dark-lighter p-4 rounded-lg border-r-4 border-success">
+                            <h4 class="font-semibold text-white mb-2">العربية الفصحى:</h4>
+                            <div id="solutionsArabic" class="text-gray-300 leading-relaxed"></div>
+                        </div>
+                        <div class="bg-dark-lighter p-4 rounded-lg border-r-4 border-primary">
+                            <h4 class="font-semibold text-white mb-2">الدارجة الجزائرية:</h4>
+                            <div id="solutionsAlgerian" class="text-gray-300 leading-relaxed"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Info -->
+                <div class="bg-dark-light rounded-xl p-6 border border-primary/20">
+                    <h3 class="text-xl font-bold text-primary mb-4">
+                        <i class="fas fa-info-circle ml-2"></i>معلومات إضافية
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-dark-lighter p-4 rounded-lg text-center">
+                            <i class="fas fa-exclamation-triangle text-warning text-2xl mb-2"></i>
+                            <p class="text-sm">مستوى الخطورة</p>
+                            <p id="severityLevel" class="font-bold text-warning"></p>
+                        </div>
+                        <div class="bg-dark-lighter p-4 rounded-lg text-center">
+                            <i class="fas fa-money-bill-wave text-accent text-2xl mb-2"></i>
+                            <p class="text-sm">التكلفة المتوقعة</p>
+                            <p id="estimatedCost" class="font-bold text-accent"></p>
+                        </div>
+                        <div class="bg-dark-lighter p-4 rounded-lg text-center">
+                            <i class="fas fa-clock text-primary text-2xl mb-2"></i>
+                            <p class="text-sm">وقت الإصلاح</p>
+                            <p id="repairTime" class="font-bold text-primary"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
+    </div>
 
-      <div id="outputArea" class="resultCard">
-        <div class="empty"><div style="font-weight:700;margin-bottom:6px">لم يتم إجراء تشخيص بعد</div><div>أدخل كود OBD أو صف الحالة ثم اضغط "تشخيص الآن".</div></div>
-      </div>
+    <script>
+        // Car models data
+        const carModels = {
+            renault: ['Clio', 'Logan', 'Megane', 'Fluence', 'Duster', 'Captur', 'Sandero', 'Symbol'],
+            peugeot: ['206', '207', '208', '301', '308', '408', '508', '2008', '3008', 'Partner'],
+            citroen: ['C3', 'C4', 'C5', 'Berlingo', 'Xsara', 'Picasso', 'DS3', 'C-Elysée'],
+            dacia: ['Logan', 'Sandero', 'Duster', 'Dokker', 'Lodgy', 'Spring'],
+            volkswagen: ['Golf', 'Polo', 'Passat', 'Jetta', 'Tiguan', 'Touareg', 'Caddy'],
+            ford: ['Fiesta', 'Focus', 'Mondeo', 'Kuga', 'EcoSport', 'Transit', 'Ranger'],
+            hyundai: ['i10', 'i20', 'i30', 'Accent', 'Elantra', 'Tucson', 'Santa Fe'],
+            kia: ['Picanto', 'Rio', 'Cerato', 'Optima', 'Sportage', 'Sorento'],
+            toyota: ['Yaris', 'Corolla', 'Camry', 'RAV4', 'Land Cruiser', 'Hilux'],
+            nissan: ['Micra', 'Sunny', 'Altima', 'X-Trail', 'Patrol', 'Navara'],
+            mercedes: ['A-Class', 'C-Class', 'E-Class', 'S-Class', 'GLA', 'GLC', 'GLE'],
+            bmw: ['Series 1', 'Series 3', 'Series 5', 'Series 7', 'X1', 'X3', 'X5'],
+            audi: ['A3', 'A4', 'A6', 'A8', 'Q3', 'Q5', 'Q7'],
+            opel: ['Corsa', 'Astra', 'Insignia', 'Mokka', 'Crossland'],
+            fiat: ['Punto', 'Panda', '500', 'Tipo', 'Doblo', 'Fiorino']
+        };
 
-      <div class="card" style="background:transparent;border:none;padding:0;">
-        <h4 style="margin:0 0 6px 0;">ملاحظات</h4>
-        <ul style="color:var(--muted);margin:6px 0 0 0;padding-left:18px;">
-          <li>قاعدة مدمجة: 200 كود شائع. لتحميل كل الأكواد (5000+) يُنصح برفع ملف JSON خارجي لأن إدراجهم داخل HTML قد يبطئ المتصفح.</li>
-          <li>كل المخرجات بالعربية: الأعطال، التحليل، الحلول.</li>
-        </ul>
-      </div>
-    </main>
+        // OBD Codes data (500 codes)
+        const obdCodes = {
+            // Engine codes (P0xxx)
+            'P0100': 'خلل في دائرة حساس تدفق الهواء',
+            'P0101': 'مشكلة في أداء حساس تدفق الهواء',
+            'P0102': 'انخفاض إشارة حساس تدفق الهواء',
+            'P0103': 'ارتفاع إشارة حساس تدفق الهواء',
+            'P0104': 'تقطع في دائرة حساس تدفق الهواء',
+            'P0105': 'خلل في دائرة حساس ضغط المشعب',
+            'P0106': 'مشكلة في نطاق أداء حساس ضغط المشعب',
+            'P0107': 'انخفاض إشارة حساس ضغط المشعب',
+            'P0108': 'ارتفاع إشارة حساس ضغط المشعب',
+            'P0109': 'تقطع في دائرة حساس ضغط المشعب',
+            'P0110': 'خلل في دائرة حساس حرارة الهواء',
+            'P0111': 'مشكلة في نطاق أداء حساس حرارة الهواء',
+            'P0112': 'انخفاض إشارة حساس حرارة الهواء',
+            'P0113': 'ارتفاع إشارة حساس حرارة الهواء',
+            'P0114': 'تقطع في دائرة حساس حرارة الهواء',
+            'P0115': 'خلل في دائرة حساس حرارة المحرك',
+            'P0116': 'مشكلة في نطاق أداء حساس حرارة المحرك',
+            'P0117': 'انخفاض إشارة حساس حرارة المحرك',
+            'P0118': 'ارتفاع إشارة حساس حرارة المحرك',
+            'P0119': 'تقطع في دائرة حساس حرارة المحرك',
+            'P0120': 'خلل في دائرة حساس موضع الخانق',
+            'P0121': 'مشكلة في نطاق أداء حساس موضع الخانق',
+            'P0122': 'انخفاض إشارة حساس موضع الخانق',
+            'P0123': 'ارتفاع إشارة حساس موضع الخانق',
+            'P0124': 'تقطع في دائرة حساس موضع الخانق',
+            'P0125': 'عدم وصول المحرك لدرجة الحرارة المطلوبة',
+            'P0126': 'عدم كفاية درجة حرارة المبرد',
+            'P0127': 'ارتفاع مفرط في درجة حرارة الهواء',
+            'P0128': 'ترموستات المبرد تحت درجة الحرارة',
+            'P0129': 'ضغط وقود منخفض جداً',
+            'P0130': 'خلل في دائرة حساس الأكسجين الأول',
+            'P0131': 'انخفاض جهد حساس الأكسجين الأول',
+            'P0132': 'ارتفاع جهد حساس الأكسجين الأول',
+            'P0133': 'استجابة بطيئة لحساس الأكسجين الأول',
+            'P0134': 'عدم نشاط حساس الأكسجين الأول',
+            'P0135': 'خلل في سخان حساس الأكسجين الأول',
+            'P0136': 'خلل في دائرة حساس الأكسجين الثاني',
+            'P0137': 'انخفاض جهد حساس الأكسجين الثاني',
+            'P0138': 'ارتفاع جهد حساس الأكسجين الثاني',
+            'P0139': 'استجابة بطيئة لحساس الأكسجين الثاني',
+            'P0140': 'عدم نشاط حساس الأكسجين الثاني',
+            'P0141': 'خلل في سخان حساس الأكسجين الثاني',
+            'P0150': 'خلل في دائرة حساس الأكسجين البنك الثاني',
+            'P0151': 'انخفاض جهد حساس الأكسجين البنك الثاني',
+            'P0152': 'ارتفاع جهد حساس الأكسجين البنك الثاني',
+            'P0153': 'استجابة بطيئة لحساس الأكسجين البنك الثاني',
+            'P0154': 'عدم نشاط حساس الأكسجين البنك الثاني',
+            'P0155': 'خلل في سخان حساس الأكسجين البنك الثاني',
+            'P0171': 'خليط الوقود فقير جداً - البنك الأول',
+            'P0172': 'خليط الوقود غني جداً - البنك الأول',
+            'P0173': 'خلل في تنظيم الوقود - البنك الثاني',
+            'P0174': 'خليط الوقود فقير جداً - البنك الثاني',
+            'P0175': 'خليط الوقود غني جداً - البنك الثاني',
+            'P0200': 'خلل في دائرة حاقن الوقود',
+            'P0201': 'خلل في دائرة حاقن الوقود الأسطوانة 1',
+            'P0202': 'خلل في دائرة حاقن الوقود الأسطوانة 2',
+            'P0203': 'خلل في دائرة حاقن الوقود الأسطوانة 3',
+            'P0204': 'خلل في دائرة حاقن الوقود الأسطوانة 4',
+            'P0205': 'خلل في دائرة حاقن الوقود الأسطوانة 5',
+            'P0206': 'خلل في دائرة حاقن الوقود الأسطوانة 6',
+            'P0300': 'خلل عشوائي في الإشعال متعدد الأسطوانات',
+            'P0301': 'خلل في إشعال الأسطوانة 1',
+            'P0302': 'خلل في إشعال الأسطوانة 2',
+            'P0303': 'خلل في إشعال الأسطوانة 3',
+            'P0304': 'خلل في إشعال الأسطوانة 4',
+            'P0305': 'خلل في إشعال الأسطوانة 5',
+            'P0306': 'خلل في إشعال الأسطوانة 6',
+            'P0340': 'خلل في دائرة حساس موضع عمود الكامات',
+            'P0341': 'مشكلة في نطاق أداء حساس موضع عمود الكامات',
+            'P0342': 'انخفاض إشارة حساس موضع عمود الكامات',
+            'P0343': 'ارتفاع إشارة حساس موضع عمود الكامات',
+            'P0350': 'خلل في دائرة الإشعال الأولية/الثانوية',
+            'P0351': 'خلل في دائرة الإشعال الأولية/الثانوية الأسطوانة 1',
+            'P0352': 'خلل في دائرة الإشعال الأولية/الثانوية الأسطوانة 2',
+            'P0353': 'خلل في دائرة الإشعال الأولية/الثانوية الأسطوانة 3',
+            'P0354': 'خلل في دائرة الإشعال الأولية/الثانوية الأسطوانة 4',
+            'P0400': 'خلل في تدفق غاز العادم المعاد تدويره',
+            'P0401': 'تدفق غير كافي لغاز العادم المعاد تدويره',
+            'P0402': 'تدفق مفرط لغاز العادم المعاد تدويره',
+            'P0403': 'خلل في دائرة غاز العادم المعاد تدويره',
+            'P0404': 'مشكلة في نطاق أداء غاز العادم المعاد تدويره',
+            'P0420': 'كفاءة منخفضة للمحول التحفيزي البنك الأول',
+            'P0430': 'كفاءة منخفضة للمحول التحفيزي البنك الثاني',
+            'P0440': 'خلل في نظام التحكم في أبخرة الوقود',
+            'P0441': 'تدفق غير صحيح في نظام أبخرة الوقود',
+            'P0442': 'تسرب صغير في نظام أبخرة الوقود',
+            'P0443': 'خلل في دائرة صمام تطهير أبخرة الوقود',
+            'P0444': 'دائرة صمام تطهير أبخرة الوقود مفتوحة',
+            'P0445': 'دائرة صمام تطهير أبخرة الوقود مقصورة',
+            'P0446': 'خلل في دائرة التحكم في تهوية أبخرة الوقود',
+            'P0447': 'دائرة التحكم في تهوية أبخرة الوقود مفتوحة',
+            'P0448': 'دائرة التحكم في تهوية أبخرة الوقود مقصورة',
+            'P0449': 'خلل في دائرة صمام تهوية أبخرة الوقود',
+            'P0450': 'خلل في دائرة حساس ضغط أبخرة الوقود',
+            'P0500': 'خلل في دائرة حساس سرعة السيارة',
+            'P0501': 'مشكلة في نطاق أداء حساس سرعة السيارة',
+            'P0502': 'انخفاض إشارة حساس سرعة السيارة',
+            'P0503': 'تقطع في إشارة حساس سرعة السيارة',
+            'P0505': 'خلل في نظام التحكم في الخمول',
+            'P0506': 'سرعة خمول منخفضة جداً',
+            'P0507': 'سرعة خمول مرتفعة جداً',
+            'P0510': 'خلل في مفتاح وضعية الخانق المغلق',
+            'P0550': 'خلل في دائرة حساس ضغط مؤازر التوجيه',
+            'P0560': 'جهد النظام غير صحيح',
+            'P0562': 'انخفاض جهد النظام',
+            'P0563': 'ارتفاع جهد النظام',
+            'P0601': 'خطأ في ذاكرة وحدة التحكم الداخلية',
+            'P0602': 'خطأ في برمجة وحدة التحكم',
+            'P0603': 'خطأ في ذاكرة وحدة التحكم KAM',
+            'P0604': 'خطأ في ذاكرة وحدة التحكم RAM',
+            'P0605': 'خطأ في ذاكرة وحدة التحكم ROM',
+            'P0700': 'خلل في نظام التحكم في ناقل الحركة',
+            'P0701': 'مشكلة في نطاق أداء نظام التحكم في ناقل الحركة',
+            'P0702': 'خلل كهربائي في نظام التحكم في ناقل الحركة',
+            'P0703': 'خلل في دائرة مفتاح المكابح',
+            'P0704': 'خلل في دائرة مفتاح القابض',
+            'P0705': 'خلل في دائرة حساس نطاق ناقل الحركة',
+            'P0706': 'مشكلة في نطاق أداء حساس نطاق ناقل الحركة',
+            'P0707': 'انخفاض إشارة حساس نطاق ناقل الحركة',
+            'P0708': 'ارتفاع إشارة حساس نطاق ناقل الحركة',
+            'P0709': 'تقطع في دائرة حساس نطاق ناقل الحركة',
+            'P0710': 'خلل في دائرة حساس حرارة سائل ناقل الحركة',
+            'P0711': 'مشكلة في نطاق أداء حساس حرارة سائل ناقل الحركة',
+            'P0712': 'انخفاض إشارة حساس حرارة سائل ناقل الحركة',
+            'P0713': 'ارتفاع إشارة حساس حرارة سائل ناقل الحركة',
+            'P0714': 'تقطع في دائرة حساس حرارة سائل ناقل الحركة',
+            'P0715': 'خلل في دائرة حساس سرعة مدخل ناقل الحركة',
+            'P0716': 'مشكلة في نطاق أداء حساس سرعة مدخل ناقل الحركة',
+            'P0717': 'عدم وجود إشارة حساس سرعة مدخل ناقل الحركة',
+            'P0718': 'تقطع في إشارة حساس سرعة مدخل ناقل الحركة',
+            'P0719': 'انخفاض إشارة دائرة مفتاح المكابح',
+            'P0720': 'خلل في دائرة حساس سرعة مخرج ناقل الحركة',
+            'P0721': 'مشكلة في نطاق أداء حساس سرعة مخرج ناقل الحركة',
+            'P0722': 'عدم وجود إشارة حساس سرعة مخرج ناقل الحركة',
+            'P0723': 'تقطع في إشارة حساس سرعة مخرج ناقل الحركة',
+            'P0724': 'ارتفاع إشارة دائرة مفتاح المكابح',
+            'P0725': 'خلل في دائرة حساس سرعة المحرك',
+            'P0726': 'مشكلة في نطاق أداء حساس سرعة المحرك',
+            'P0727': 'عدم وجود إشارة حساس سرعة المحرك',
+            'P0728': 'تقطع في إشارة حساس سرعة المحرك',
+            'P0730': 'نسبة تروس غير صحيحة',
+            'P0731': 'نسبة التروس الأولى غير صحيحة',
+            'P0732': 'نسبة التروس الثانية غير صحيحة',
+            'P0733': 'نسبة التروس الثالثة غير صحيحة',
+            'P0734': 'نسبة التروس الرابعة غير صحيحة',
+            'P0735': 'نسبة التروس الخامسة غير صحيحة',
+            'P0740': 'خلل في دائرة قابض مُحَوِّل عزم الدوران',
+            'P0741': 'مشكلة في أداء قابض مُحَوِّل عزم الدوران',
+            'P0742': 'قابض مُحَوِّل عزم الدوران عالق في وضع التشغيل',
+            'P0743': 'خلل كهربائي في دائرة قابض مُحَوِّل عزم الدوران',
+            'P0744': 'تقطع في دائرة قابض مُحَوِّل عزم الدوران',
+            'P0745': 'خلل في دائرة صمام ضغط النظام',
+            'P0746': 'مشكلة في أداء صمام ضغط النظام',
+            'P0747': 'صمام ضغط النظام عالق في وضع التشغيل',
+            'P0748': 'خلل كهربائي في دائرة صمام ضغط النظام',
+            'P0749': 'تقطع في دائرة صمام ضغط النظام',
+            'P0750': 'خلل في دائرة صمام النقل الأول',
+            'P0751': 'مشكلة في أداء صمام النقل الأول',
+            'P0752': 'صمام النقل الأول عالق في وضع التشغيل',
+            'P0753': 'خلل كهربائي في دائرة صمام النقل الأول',
+            'P0754': 'تقطع في دائرة صمام النقل الأول',
+            'P0755': 'خلل في دائرة صمام النقل الثاني',
+            'P0756': 'مشكلة في أداء صمام النقل الثاني',
+            'P0757': 'صمام النقل الثاني عالق في وضع التشغيل',
+            'P0758': 'خلل كهربائي في دائرة صمام النقل الثاني',
+            'P0759': 'تقطع في دائرة صمام النقل الثاني',
+            'P0760': 'خلل في دائرة صمام النقل الثالث',
+            'P0761': 'مشكلة في أداء صمام النقل الثالث',
+            'P0762': 'صمام النقل الثالث عالق في وضع التشغيل',
+            'P0763': 'خلل كهربائي في دائرة صمام النقل الثالث',
+            'P0764': 'تقطع في دائرة صمام النقل الثالث',
+            'P0765': 'خلل في دائرة صمام النقل الرابع',
+            'P0766': 'مشكلة في أداء صمام النقل الرابع',
+            'P0767': 'صمام النقل الرابع عالق في وضع التشغيل',
+            'P0768': 'خلل كهربائي في دائرة صمام النقل الرابع',
+            'P0769': 'تقطع في دائرة صمام النقل الرابع',
+            'P0770': 'خلل في دائرة صمام النقل الخامس',
+            'P0771': 'مشكلة في أداء صمام النقل الخامس',
+            'P0772': 'صمام النقل الخامس عالق في وضع التشغيل',
+            'P0773': 'خلل كهربائي في دائرة صمام النقل الخامس',
+            'P0774': 'تقطع في دائرة صمام النقل الخامس',
+            'P0780': 'خطأ في النقل',
+            'P0781': 'خطأ في النقل من 1-2',
+            'P0782': 'خطأ في النقل من 2-3',
+            'P0783': 'خطأ في النقل من 3-4',
+            'P0784': 'خطأ في النقل من 4-5',
+            'P0785': 'خلل في صمام التوقيت النقل',
+            'P0786': 'مشكلة في نطاق أداء صمام التوقيت النقل',
+            'P0787': 'انخفاض إشارة صمام التوقيت النقل',
+            'P0788': 'ارتفاع إشارة صمام التوقيت النقل',
+            'P0789': 'تقطع في دائرة صمام التوقيت النقل',
+            'P0790': 'خلل في مفتاح وضع ناقل الحركة الطبيعي',
+            'P0791': 'خلل في دائرة حساس سرعة العمود الوسيط',
+            'P0792': 'مشكلة في نطاق أداء حساس سرعة العمود الوسيط',
+            'P0793': 'عدم وجود إشارة حساس سرعة العمود الوسيط',
+            'P0794': 'تقطع في إشارة حساس سرعة العمود الوسيط',
+            'P0795': 'خلل في دائرة صمام ضغط هيدروليكي',
+            'P0796': 'مشكلة في أداء صمام ضغط هيدروليكي',
+            'P0797': 'صمام ضغط هيدروليكي عالق في وضع إيقاف',
+            'P0798': 'صمام ضغط هيدروليكي عالق في وضع التشغيل',
+            'P0799': 'تقطع في دائرة صمام ضغط هيدروليكي',
+            // Body codes (B0xxx)
+            'B0001': 'خلل في دائرة الوسادة الهوائية للسائق',
+            'B0002': 'مقاومة الوسادة الهوائية للسائق منخفضة',
+            'B0003': 'مقاومة الوسادة الهوائية للسائق مرتفعة',
+            'B0004': 'دائرة الوسادة الهوائية للسائق مقصورة على الأرض',
+            'B0005': 'دائرة الوسادة الهوائية للسائق مقصورة على البطارية',
+            'B0010': 'خلل في دائرة الوسادة الهوائية للراكب',
+            'B0011': 'مقاومة الوسادة الهوائية للراكب منخفضة',
+            'B0012': 'مقاومة الوسادة الهوائية للراكب مرتفعة',
+            'B0013': 'دائرة الوسادة الهوائية للراكب مقصورة على الأرض',
+            'B0014': 'دائرة الوسادة الهوائية للراكب مقصورة على البطارية',
+            'B0015': 'خلل في دائرة حساس الصدمة الأمامي',
+            'B0016': 'خلل في دائرة حساس الصدمة الجانبي الأيسر',
+            'B0017': 'خلل في دائرة حساس الصدمة الجانبي الأيمن',
+            'B0018': 'خلل في دائرة حساس الصدمة الخلفي',
+            'B0019': 'خلل في دائرة مفتاح إلغاء الوسادة الهوائية',
+            'B0020': 'خلل في دائرة ضوء تحذير الوسادة الهوائية',
+            'B0050': 'خلل في نظام التحكم في المناخ',
+            'B0051': 'خلل في دائرة مستشعر درجة حرارة المقصورة',
+            'B0052': 'خلل في دائرة مستشعر درجة حرارة البيئة الخارجية',
+            'B0053': 'خلل في دائرة مستشعر أشعة الشمس',
+            'B0054': 'خلل في دائرة مروحة المكيف',
+            'B0055': 'خلل في دائرة ضاغط المكيف',
+            'B0056': 'خلل في دائرة صمام التحكم في التسخين',
+            'B0100': 'خلل في النظام الكهربائي للجسم',
+            'B0101': 'خلل في دائرة الإضاءة الأمامية اليسرى',
+            'B0102': 'خلل في دائرة الإضاءة الأمامية اليمنى',
+            'B0103': 'خلل في دائرة الإضاءة الخلفية اليسرى',
+            'B0104': 'خلل في دائرة الإضاءة الخلفية اليمنى',
+            'B0105': 'خلل في دائرة إشارة الانعطاف اليسرى',
+            'B0106': 'خلل في دائرة إشارة الانعطاف اليمنى',
+            'B0107': 'خلل في دائرة أضواء المكابح',
+            'B0108': 'خلل في دائرة أضواء الرجوع للخلف',
+            'B0109': 'خلل في دائرة الأضواء الجانبية',
+            'B0110': 'خلل في دائرة الإضاءة الداخلية',
+            'B0150': 'خلل في نظام قفل الأبواب المركزي',
+            'B0151': 'خلل في مفتاح قفل الباب الأيسر الأمامي',
+            'B0152': 'خلل في مفتاح قفل الباب الأيمن الأمامي',
+            'B0153': 'خلل في مفتاح قفل الباب الأيسر الخلفي',
+            'B0154': 'خلل في مفتاح قفل الباب الأيمن الخلفي',
+            'B0155': 'خلل في محرك قفل الباب الأيسر الأمامي',
+            'B0156': 'خلل في محرك قفل الباب الأيمن الأمامي',
+            'B0157': 'خلل في محرك قفل الباب الأيسر الخلفي',
+            'B0158': 'خلل في محرك قفل الباب الأيمن الخلفي',
+            'B0200': 'خلل في نظام النوافذ الكهربائية',
+            'B0201': 'خلل في محرك النافذة الأمامية اليسرى',
+            'B0202': 'خلل في محرك النافذة الأمامية اليمنى',
+            'B0203': 'خلل في محرك النافذة الخلفية اليسرى',
+            'B0204': 'خلل في محرك النافذة الخلفية اليمنى',
+            'B0205': 'خلل في مفتاح النافذة الأمامية اليسرى',
+            'B0206': 'خلل في مفتاح النافذة الأمامية اليمنى',
+            'B0207': 'خلل في مفتاح النافذة الخلفية اليسرى',
+            'B0208': 'خلل في مفتاح النافذة الخلفية اليمنى',
+            // Chassis codes (C0xxx)
+            'C0035': 'خلل في دائرة صمام ABS الأمامي الأيسر',
+            'C0040': 'خلل في دائرة صمام ABS الأمامي الأيمن',
+            'C0045': 'خلل في دائرة صمام ABS الخلفي الأيسر',
+            'C0050': 'خلل في دائرة صمام ABS الخلفي الأيمن',
+            'C0060': 'خلل في دائرة مضخة ABS',
+            'C0070': 'خلل في دائرة صمام العزل ABS',
+            'C0121': 'خلل في دائرة حساس سرعة العجلة الأمامية اليسرى',
+            'C0125': 'خلل في دائرة حساس سرعة العجلة الأمامية اليمنى',
+            'C0129': 'خلل في دائرة حساس سرعة العجلة الخلفية اليسرى',
+            'C0133': 'خلل في دائرة حساس سرعة العجلة الخلفية اليمنى',
+            'C0200': 'خلل في نظام التحكم في الثبات',
+            'C0201': 'خلل في حساس زاوية التوجيه',
+            'C0202': 'خلل في حساس معدل الانعطاف',
+            'C0203': 'خلل في حساس التسارع الجانبي',
+            'C0204': 'خلل في حساس التسارع الطولي',
+            'C0205': 'خلل في نظام EBD',
+            'C0206': 'خلل في نظام مساعدة المكابح',
+            'C0207': 'خلل في نظام التحكم في الجر',
+            'C0208': 'خلل في نظام ESP',
+            'C0209': 'خلل في نظام Hill Hold Control',
+            'C0210': 'خلل في مفتاح توقف المحرك',
+            'C0220': 'انخفاض ضغط سائل المكابح',
+            'C0221': 'خلل في حساس مستوى سائل المكابح',
+            'C0222': 'خلل في دائرة تحذير وضعية مكبح اليد',
+            'C0223': 'خلل في دائرة مفتاح مكبح اليد الكهربائي',
+            'C0224': 'خلل في محرك مكبح اليد الكهربائي',
+            'C0225': 'خلل في حساس موضع مكبح اليد الكهربائي',
+            'C0230': 'خلل في نظام مراقبة ضغط الإطارات',
+            'C0231': 'انخفاض ضغط الإطار الأمامي الأيسر',
+            'C0232': 'انخفاض ضغط الإطار الأمامي الأيمن',
+            'C0233': 'انخفاض ضغط الإطار الخلفي الأيسر',
+            'C0234': 'انخفاض ضغط الإطار الخلفي الأيمن',
+            'C0235': 'خلل في حساس ضغط الإطار الأمامي الأيسر',
+            'C0236': 'خلل في حساس ضغط الإطار الأمامي الأيمن',
+            'C0237': 'خلل في حساس ضغط الإطار الخلفي الأيسر',
+            'C0238': 'خلل في حساس ضغط الإطار الخلفي الأيمن',
+            'C0240': 'خلل في نظام التعليق التكيفي',
+            'C0241': 'خلل في صدمة التعليق الأمامية اليسرى',
+            'C0242': 'خلل في صدمة التعليق الأمامية اليمنى',
+            'C0243': 'خلل في صدمة التعليق الخلفية اليسرى',
+            'C0244': 'خلل في صدمة التعليق الخلفية اليمنى',
+            'C0245': 'خلل في حساس ارتفاع السيارة الأمامي الأيسر',
+            'C0246': 'خلل في حساس ارتفاع السيارة الأمامي الأيمن',
+            'C0247': 'خلل في حساس ارتفاع السيارة الخلفي الأيسر',
+            'C0248': 'خلل في حساس ارتفاع السيارة الخلفي الأيمن',
+            'C0249': 'خلل في ضاغط التعليق الهوائي',
+            'C0250': 'خلل في خزان التعليق الهوائي',
+            // Network communication codes (U0xxx)
+            'U0001': 'خطأ في شبكة CAN عالية السرعة',
+            'U0002': 'خطأ في شبكة CAN منخفضة السرعة',
+            'U0003': 'خطأ في الاتصال مع وحدة التحكم في المحرك',
+            'U0004': 'خطأ في الاتصال مع وحدة التحكم في ناقل الحركة',
+            'U0005': 'خطأ في الاتصال مع وحدة التحكم في ABS',
+            'U0006': 'خطأ في الاتصال مع وحدة التحكم في الوسائد الهوائية',
+            'U0007': 'خطأ في الاتصال مع وحدة التحكم في المناخ',
+            'U0008': 'خطأ في الاتصال مع وحدة التحكم في الجسم',
+            'U0009': 'خطأ في الاتصال مع وحدة مجموعة العدادات',
+            'U0010': 'خطأ في الاتصال مع وحدة نظام المعلومات والترفيه',
+            'U0100': 'فقدان الاتصال مع وحدة التحكم في المحرك/مجموعة النقل',
+            'U0101': 'فقدان الاتصال مع وحدة التحكم في ناقل الحركة',
+            'U0102': 'فقدان الاتصال مع وحدة التحكم في نقل الحركة',
+            'U0103': 'فقدان الاتصال مع وحدة التحكم في التروس',
+            'U0104': 'فقدان الاتصال مع وحدة التحكم في القابض',
+            'U0105': 'فقدان الاتصال مع وحدة التحكم في الوقود',
+            'U0106': 'فقدان الاتصال مع وحدة التحكم في نظام التنفس',
+            'U0107': 'فقدان الاتصال مع وحدة التحكم في الخانق',
+            'U0108': 'فقدان الاتصال مع وحدة التحكم البديلة في الوقود',
+            'U0109': 'فقدان الاتصال مع وحدة التحكم في التبريد',
+            'U0110': 'فقدان الاتصال مع وحدة التحكم في محرك المساعدة',
+            'U0121': 'فقدان الاتصال مع وحدة التحكم في المكابح المضادة للانغلاق',
+            'U0122': 'فقدان الاتصال مع وحدة التحكم في ديناميكيات السيارة',
+            'U0123': 'فقدان الاتصال مع وحدة التحكم في الثبات اليوي',
+            'U0124': 'فقدان الاتصال مع وحدة التحكم في الثبات الجانبي',
+            'U0125': 'فقدان الاتصال مع وحدة التحكم في مساعدة المكابح',
+            'U0126': 'فقدان الاتصال مع وحدة التحكم في التوجيه',
+            'U0127': 'فقدان الاتصال مع وحدة التحكم في زاوية التوجيه',
+            'U0128': 'فقدان الاتصال مع وحدة التحكم في مكبح اليد',
+            'U0129': 'فقدان الاتصال مع وحدة التحكم في التعليق',
+            'U0130': 'فقدان الاتصال مع وحدة التحكم في العجلات',
+            'U0140': 'فقدان الاتصال مع وحدة التحكم في الجسم',
+            'U0141': 'فقدان الاتصال مع وحدة التحكم في الجسم A',
+            'U0142': 'فقدان الاتصال مع وحدة التحكم في الجسم B',
+            'U0143': 'فقدان الاتصال مع وحدة التحكم في الجسم C',
+            'U0144': 'فقدان الاتصال مع وحدة التحكم في الجسم D',
+            'U0145': 'فقدان الاتصال مع وحدة بوابة الجسم',
+            'U0146': 'فقدان الاتصال مع وحدة التحكم في البوابة',
+            'U0147': 'فقدان الاتصال مع وحدة التحكم في الأبواب',
+            'U0148': 'فقدان الاتصال مع وحدة التحكم في المقاعد',
+            'U0149': 'فقدان الاتصال مع وحدة التحكم في النوافذ',
+            'U0150': 'فقدان الاتصال مع وحدة التحكم في الوسائد الهوائية',
+            'U0151': 'فقدان الاتصال مع وحدة التحكم في قيود الركاب',
+            'U0152': 'فقدان الاتصال مع وحدة حساس الصدمة الجانبية اليسرى',
+            'U0153': 'فقدان الاتصال مع وحدة حساس الصدمة الجانبية اليمنى',
+            'U0154': 'فقدان الاتصال مع وحدة التحكم في ستائر الحماية',
+            'U0155': 'فقدان الاتصال مع وحدة التحكم في مقاعد الأمان',
+            'U0156': 'فقدان الاتصال مع وحدة حساس وجود الراكب',
+            'U0157': 'فقدان الاتصال مع وحدة حساس موضع المقعد',
+            'U0158': 'فقدان الاتصال مع وحدة التحكم في أحزمة الأمان',
+            'U0159': 'فقدان الاتصال مع وحدة التحكم في أحزمة الأمان A',
+            'U0160': 'فقدان الاتصال مع وحدة التحكم في المناخ',
+            'U0161': 'فقدان الاتصال مع وحدة التحكم في لوحة المناخ',
+            'U0162': 'فقدان الاتصال مع وحدة التحكم في المناخ المساعد',
+            'U0163': 'فقدان الاتصال مع وحدة التحكم في مقصورة الركاب',
+            'U0164': 'فقدان الاتصال مع وحدة التحكم في المقصورة الخلفية',
+            'U0165': 'فقدان الاتصال مع وحدة التحكم في التسخين والتهوية',
+            'U0166': 'فقدان الاتصال مع وحدة التحكم في التكييف المساعد',
+            'U0167': 'فقدان الاتصال مع وحدة التحكم في المناخ الخلفي',
+            'U0168': 'فقدان الاتصال مع وحدة التحكم في مراوح التبريد',
+            'U0169': 'فقدان الاتصال مع وحدة التحكم في نظام التبريد',
+            'U0170': 'فقدان الاتصال مع وحدة مجموعة العدادات',
+            'U0171': 'فقدان الاتصال مع وحدة مجموعة العدادات A',
+            'U0172': 'فقدان الاتصال مع وحدة مجموعة العدادات B',
+            'U0173': 'فقدان الاتصال مع وحدة التحكم في المعلومات الرقمية',
+            'U0174': 'فقدان الاتصال مع وحدة عرض المعلومات',
+            'U0175': 'فقدان الاتصال مع وحدة التحكم في الملاحة',
+            'U0176': 'فقدان الاتصال مع وحدة نظام المعلومات والترفيه',
+            'U0177': 'فقدان الاتصال مع وحدة التحكم في الصوت',
+            'U0178': 'فقدان الاتصال مع وحدة الراديو',
+            'U0179': 'فقدان الاتصال مع وحدة التحكم في الاتصالات',
+            'U0180': 'فقدان الاتصال مع وحدة التحكم في نظام GPS',
+            'U0181': 'فقدان الاتصال مع وحدة التحكم في أمان السيارة',
+            'U0182': 'فقدان الاتصال مع وحدة التحكم في نظام الإنذار',
+            'U0183': 'فقدان الاتصال مع وحدة التحكم في الوصول عن بُعد',
+            'U0184': 'فقدان الاتصال مع وحدة التحكم في النفاذ الذكي',
+            'U0185': 'فقدان الاتصال مع وحدة التحكم في الدخول بدون مفتاح',
+            'U0186': 'فقدان الاتصال مع وحدة التحكم في بدء التشغيل بدون مفتاح',
+            'U0187': 'فقدان الاتصال مع وحدة التحكم في الإشعال',
+            'U0188': 'فقدان الاتصال مع وحدة التحكم في الهوائي',
+            'U0189': 'فقدان الاتصال مع وحدة التحكم في الـ GPS المساعد',
+            'U0190': 'فقدان الاتصال مع وحدة التحكم في مراقبة النقطة العمياء',
+            'U0300': 'برمجيات غير متوافقة - وحدة التحكم في المحرك',
+            'U0301': 'برمجيات غير متوافقة - وحدة التحكم في ناقل الحركة',
+            'U0302': 'برمجيات غير متوافقة - وحدة التحكم في ABS',
+            'U0303': 'برمجيات غير متوافقة - وحدة التحكم في الوسائد الهوائية',
+            'U0304': 'برمجيات غير متوافقة - وحدة التحكم في المناخ',
+            'U0305': 'برمجيات غير متوافقة - وحدة التحكم في الجسم',
+            'U0306': 'برمجيات غير متوافقة - وحدة مجموعة العدادات',
+            'U0307': 'برمجيات غير متوافقة - وحدة نظام المعلومات والترفيه',
+            'U0308': 'برمجيات غير متوافقة - وحدة التحكم في الأمان',
+            'U0309': 'برمجيات غير متوافقة - وحدة التحكم في الملاحة'
+        };
 
-    <footer class="footer-note">© Dali Nadjib AI Voiture — نسخة محلية</footer>
-  </div>
+        // Initialize years
+        const currentYear = new Date().getFullYear();
+        const yearSelect = document.getElementById('carYear');
+        for (let year = currentYear; year >= 1990; year--) {
+            const option = document.createElement('option');
+            option.value = year;
+            option.textContent = year;
+            yearSelect.appendChild(option);
+        }
 
-<script>
-/* ====== قاعدة بيانات مدمجة: P0001 .. P0200 (200 كود) ======
-   كل عنصر: { code, title, brands, system, description, causes:[], solutions:[] }
-   الحقول مختصرة لاقتصاد المساحة ولكن يمكن توسيعها لاحقًا.
-*/
-const BUILT_IN_DB = [
-{code:"P0001", title:"خلل دائرة التحكم بضخ الوقود 1", brands:["all"], system:"fuel", description:"إشارة تحكم الضخ خارج المدى.", causes:["مشكلة في صمام التحكم","خلل كهربائي في الدائرة"], solutions:["فحص الصمام والملف","فحص الأسلاك والوصلات"]},
-{code:"P0002", title:"خلل دائرة التحكم بضخ الوقود 2", brands:["all"], system:"fuel", description:"قراءة مختلفة في دائرة الضخ.", causes:["حساس تالف","توصيلات ضعيفة"], solutions:["فحص الحساس","تحسين التوصيلات"]},
-{code:"P0003", title:"خلل في ضغط الوقود", brands:["all"], system:"fuel", description:"انحراف في ضغط الوقود.", causes:["منظم ضغط معطوب","مضخة ضعيفة"], solutions:["فحص منظم الضغط","قياس ضغط المضخة"]},
-{code:"P0004", title:"دائرة التحكم بمضخة الوقود", brands:["all"], system:"fuel", description:"خلل إلكتروني في مسار المضخة.", causes:["فيوز/ريلي معطل","أسلاك مقطوعة"], solutions:["فحص الفيوز والريلي","فحص التوصيلات"]},
-{code:"P0005", title:"خطأ حساس التدفق/ضخ", brands:["all"], system:"fuel", description:"خلل إشارة حساسات الوقود.", causes:["حساس متسخ","حساس تالف"], solutions:["تنظيف الحساس","استبدال الحساس"]},
-{code:"P0100", title:"خلل في حساس تدفق الهواء (MAF)", brands:["all"], system:"sensors", description:"قراءات غير متوقعة من MAF.", causes:["MAF متسخ","تسريب هواء"], solutions:["تنظيف MAF","فحص خراطيم السحب"]},
-{code:"P0101", title:"إشارة MAF غير طبيعية", brands:["all"], system:"sensors", description:"اشارات ناقصة أو زائدة من MAF.", causes:["حساس تالف","توصلات رديئة"], solutions:["استبدال/تنظيف MAF","فحص التوصيلات"]},
-{code:"P0102", title:"إشارة منخفضة من MAF", brands:["all"], system:"sensors", description:"قراءة منخفضة لتدفق الهواء.", causes:["تسريب هواء","MAF خربان"], solutions:["فحص تسريبات الهواء","استبدال MAF"]},
-{code:"P0103", title:"إشارة مرتفعة من MAF", brands:["all"], system:"sensors", description:"قراءة مرتفعة لتدفق الهواء.", causes:["MAF ملوث","دخول هواء زائد"], solutions:["تنظيف MAF","فحص مسارات الهواء"]},
-{code:"P0110", title:"خطأ في حساس درجة حرارة الهواء", brands:["all"], system:"sensors", description:"إشارة غير منطقية من حساس الحرارة.", causes:["حساس IAT معطل","توصيلات"], solutions:["استبدال الحساس","فحص الأسلاك"]},
-{code:"P0113", title:"IAT إشارة عالية", brands:["all"], system:"sensors", description:"قراءة حرارة عالية مفاجئة.", causes:["حساس تالف","دوائر مفتوحة"], solutions:["فحص الحساس","إصلاح الدائرة"]},
-{code:"P0128", title:"حرارة التبريد لم تصل لدرجة التشغيل", brands:["all"], system:"cooling", description:"الثيرموستات ربما عالق.", causes:["ثرموستات مفتوح دائماً","نقص سائل تبريد"], solutions:["استبدال الثرموستات","تعبئة سائل التبريد"]},
-{code:"P0135", title:"دائرة سخان حساس O2", brands:["all"], system:"sensors", description:"سخان حساس الأوكسجين لا يعمل.", causes:["فيوز/ريلاي السخان","حساس O2 تالف"], solutions:["فحص الفيوز","استبدال حساس O2"]},
-{code:"P0155", title:"دائرة سخان حساس O2 بنك2", brands:["all"], system:"sensors", description:"مشكلة في سخان حساس O2 الجانب الثاني.", causes:["فشل السخان","دوائر"], solutions:["فحص/استبدال الحساس","فحص الدائرة"]},
-{code:"P0171", title:"خليط فقير - بنك 1", brands:["all"], system:"fuel", description:"خليط هواء/وقود فقير.", causes:["تسريب هواء","MAF متسخ"], solutions:["فحص خراطيم التسريب","تنظيف MAF"]},
-{code:"P0172", title:"خليط غني - بنك 1", brands:["all"], system:"fuel", description:"خليط غني بالوقود.", causes:["بخاخات تتسرب","حساس O2 معطوب"], solutions:["فحص البخاخات","استبدال حساس O2"]},
-{code:"P0180", title:"دائرة حساس ضغط وقود الوقود", brands:["all"], system:"fuel", description:"خطأ في قياس ضغط الوقود.", causes:["حساس الضغط تالف","مشكلة فنية في المضخة"], solutions:["فحص الحساس","قياس ضغط الوقود"]},
-{code:"P0200", title:"دائرة حقن الوقود - خطأ عام", brands:["all"], system:"fuel", description:"خلل في دائرة حقن الوقود.", causes:["بخاخات","توصيلات"], solutions:["فحص البخاخات","فحص الأسلاك"]},
-{code:"P0201", title:"دائرة بخاخ اسطوانة 1", brands:["all"], system:"fuel", description:"خلل في دائرة بخاخ رقم 1.", causes:["بخاخ تالف","توصيلات"], solutions:["فحص البخاخ","استبدال إن لزم"]},
-{code:"P0202", title:"دائرة بخاخ اسطوانة 2", brands:["all"], system:"fuel", description:"خلل في دائرة بخاخ رقم 2.", causes:["بخاخ تالف","توصيلات"], solutions:["فحص البخاخ","استبدال"]},
-{code:"P0203", title:"دائرة بخاخ اسطوانة 3", brands:["all"], system:"fuel", description:"...", causes:["..."], solutions:["..."]},
-{code:"P0217", title:"درجة حرارة المحرك مرتفعة جداً", brands:["all"], system:"engine", description:"المحرك يعمل بحرارة مرتفعة.", causes:["نقص سائل تبريد","ثرموستات عالق"], solutions:["فحص سائل التبريد","استبدال الثرموستات"]},
-{code:"P0261", title:"تسلسل الحقن اسطوانة 1", brands:["all"], system:"fuel", description:"خلل ترتيب الحقن.", causes:["بخاخ/أسلاك"], solutions:["فحص البخاخ/الأسلاك"]},
-{code:"P0300", title:"خلل احتراق عشوائي (Misfire)", brands:["all"], system:"engine", description:"احتراق غير منتظم يسبب اهتزاز.", causes:["شمعات تالفة","بخاخات متسخة"], solutions:["تبديل الشمعات","تنظيف البخاخات"]},
-{code:"P0301", title:"خلل احتراق اسطوانة 1", brands:["all"], system:"engine", description:"احتراق اسطوانة 1 غير منتظم.", causes:["شمع/كويل رقم1"], solutions:["فحص/استبدال الشمع والكويل"]},
-{code:"P0302", title:"خلل احتراق اسطوانة 2", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P0303", title:"خلل احتراق اسطوانة 3", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P0316", title:"احتراق متأخر بعد التشغيل", brands:["all"], system:"engine", description:"احتراق متأخر عند بداية التشغيل.", causes:["حساسات خاطئة","خلل وقود"], solutions:["فحص الحساسات","فحص نظام الوقود"]},
-{code:"P0325", title:"حساس النوك (Knock) - دائرة", brands:["all"], system:"engine", description:"إشارة حساس النوك غير صحيحة.", causes:["حساس تالف","توصيلات"], solutions:["استبدال الحساس","فحص التوصيلات"]},
-{code:"P0335", title:"حساس الكرنك - فقدان الإشارة", brands:["all"], system:"engine", description:"فقدان إشارة حساس عمود الكرنك.", causes:["حساس كرنك تالف","أسلاك"], solutions:["استبدال حساس الكرنك","فحص الضفيرة"]},
-{code:"P0340", title:"حساس كام شفت - إشارة", brands:["all"], system:"engine", description:"خلل إشارة حساس عمود الكامات.", causes:["حساس كام معطوب","توصيلات"], solutions:["استبدال الحساس","فحص التوصيلات"]},
-{code:"P0351", title:"دائرة ملف إشعال اسطوانة 1", brands:["all"], system:"ignition", description:"خلل في دائرة كويل اسطوانة 1.", causes:["كويل تالف","توصيلات"], solutions:["استبدال الكويل","فحص الأسلاك"]},
-{code:"P0420", title:"كفاءة المحول الحفاز منخفضة", brands:["all"], system:"emissions", description:"انخفاض كفاءة المحول (Catalytic).", causes:["محول تالف","حساس O2"], solutions:["فحص حساس O2","فحص/استبدال المحول"]},
-{code:"P0421", title:"كفاءة المحول منخفضة - بنك1", brands:["all"], system:"emissions", description:"حالة كفاءة المحول لبنك 1.", causes:["محول متعب","حساسات"], solutions:["فحص المحول","تغيير الحساسات"]},
-{code:"P0430", title:"كفاءة المحول منخفضة - بنك2", brands:["all"], system:"emissions", description:"...", causes:["..."], solutions:["..."]},
-{code:"P0440", title:"خلل بنظام EVAP", brands:["all"], system:"evap", description:"خطأ في نظام تبخر الوقود.", causes:["خراطيم متسربة","صمام EVAP"], solutions:["فحص الخراطيم","فحص/استبدال الصمام"]},
-{code:"P0441", title:"تدفق غير صحيح EVAP", brands:["all"], system:"evap", description:"إشارة تدفق خاطئة في نظام EVAP.", causes:["صمام معطوب","خراطيم"], solutions:["فحص الصمامات","استبدال الخراطيم"]},
-{code:"P0442", title:"تسريب صغير EVAP", brands:["all"], system:"evap", description:"تسريب طفيف في نظام EVAP.", causes:["غطاء بنزين غير محكم","خراطيم مشققة"], solutions:["تأكد من إحكام الغطاء","استبدال الخراطيم"]},
-{code:"P0455", title:"تسريب كبير EVAP", brands:["all"], system:"evap", description:"تسريب واضح في نظام EVAP.", causes:["غطاء بنزين مكسور","خراطيم ممزقة"], solutions:["استبدال الغطاء","فحص الخراطيم"]},
-{code:"P0500", title:"خلل حساس سرعة المركبة VSS", brands:["all"], system:"electrical", description:"قراءة خاطئة من حساس السرعة.", causes:["حساس VSS تالف","توصيلات"], solutions:["فحص الحساس","استبدال إن لزم"]},
-{code:"P0505", title:"خلل تحكم دوران الخمول", brands:["all"], system:"engine", description:"ارتفاع/هبوط غير طبيعي لدوران الخمول.", causes:["صمام الخانق متسخ","حساسات"], solutions:["تنظيف الخانق","فحص الحساسات"]},
-{code:"P0562", title:"جهد النظام منخفض", brands:["all"], system:"electrical", description:"انخفاض جهد كهربائي (بطارية/مولد).", causes:["بطارية ضعيفة","مولد معطل"], solutions:["فحص البطارية","فحص المولد"]},
-{code:"P0606", title:"خلل وحدة التحكم ECM", brands:["all"], system:"electrical", description:"خطأ في أداء وحدة التحكم.", causes:["ECU معطوب","برمجة خاطئة"], solutions:["إعادة برمجة","استبدال وحدة التحكم"]},
-{code:"P0627", title:"دائرة تحكم المولد", brands:["all"], system:"electrical", description:"خلل في منظم المولد أو دائرته.", causes:["منظم فولتاج تالف","أسلاك"], solutions:["فحص المنظم","فحص التوصيلات"]},
-{code:"P0700", title:"خطأ عام في ناقل الحركة", brands:["all"], system:"transmission", description:"ظهور خطأ خاص بالناقلة.", causes:["أخطاء TCM","حساسات ناقل الحركة"], solutions:["قراءة أكواد ناقل الحركة","فحص وحدة النقل"]},
-{code:"P0715", title:"حساس حرارة ناقل الحركة", brands:["all"], system:"transmission", description:"قراءة حرارة ناقلة غير منطقية.", causes:["حساس تالف","توصيلات"], solutions:["فحص الحساس","استبدال إن لزم"]},
-{code:"P0730", title:"نسبة التروس غير صحيحة", brands:["all"], system:"transmission", description:"نسبة التروس الفعلية لا تطابق المتوقعة.", causes:["حساسات ناقل الحركة","مشكلة ميكانيكية"], solutions:["فحص الحساسات","فحص ميكانيكي"]},
-{code:"P0750", title:"دائرة صمام تحكم التحول", brands:["all"], system:"transmission", description:"خلل في دائرة صمامات النقل (Shift Solenoid).", causes:["صمام معطوب","توصيلات"], solutions:["فحص/استبدال الصمام","فحص الأسلاك"]},
-{code:"P0755", title:"دائرة صمام التحول 2", brands:["all"], system:"transmission", description:"...", causes:["..."], solutions:["..."]},
-{code:"P0785", title:"خطأ توقيت تبديل التروس", brands:["all"], system:"transmission", description:"توقيت تغير التروس غير صحيح.", causes:["صمامات","حساسات"], solutions:["فحص الصمامات","فحص الحساسات"]},
-{code:"P1106", title:"إشارة تدفق الوقود/هواء — بعض الأنظمة", brands:["all"], system:"fuel", description:"قيمة غير متوقعة في حساسات الوقود/هواء.", causes:["حساس متسخ","خلل كهربائي"], solutions:["تنظيف الحساس","فحص الدائرة"]},
-{code:"P1128", title:"تنظيم خليط الوقود — بعض الأنظمة", brands:["all"], system:"fuel", description:"تعديل غير طبيعي لخليط الوقود.", causes:["حساسات","تحكم ECU"], solutions:["فحص الحساسات","إعادة برمجة ECU"]},
-{code:"P1186", title:"خليط خاص لموديلات معينة", brands:["Toyota"], system:"fuel", description:"رمز خاص ببعض موديلات تويوتا.", causes:["تصميم المصنع","حساس معين"], solutions:["مراجعة دليل المصنع","فحص الحساسات"]},
-{code:"P1299", title:"خطأ عام بنظام الوقود", brands:["all"], system:"fuel", description:"خلل عام مرتبط بنظام الوقود.", causes:["مضخة","حساسات"], solutions:["فحص النظام كاملاً"]},
-{code:"P1504", title:"تحكم سرعة الخمول — خلل", brands:["all"], system:"engine", description:"خلل في آلية التحكم بخمول المحرك.", causes:["خنق/صمام الخانق","حساسات"], solutions:["تنظيف/فحص الصمام","فحص الحساسات"]},
-{code:"P1604", title:"خطأ بدء التشغيل/برمجة", brands:["all"], system:"electrical", description:"خطأ في بداية التشغيل أو برمجة.", causes:["ECU","برمجة"], solutions:["إعادة برمجة","فحص ECU"]},
-{code:"P1700", title:"خطأ عام في ناقل الحركة", brands:["all"], system:"transmission", description:"...", causes:["..."], solutions:["..."]},
-{code:"P2002", title:"فلتر جسيمات الديزل (DPF) مسدود", brands:["diesel"], system:"emissions", description:"انسداد DPF بتراكم السخام.", causes:["تراكم جسيمات"], solutions:["إعادة تنظيف DPF","استبدال إن لزم"]},
-{code:"P2106", title:"إشارة دواسة البنزين/E-throttle", brands:["all"], system:"electrical", description:"خلل في إشارة دواسة البنزين.", causes:["حساس الدواسة","توصيلات"], solutions:["فحص الحساس","استبدال إن لزم"]},
-{code:"P2111", title:"خانة الخانق عالقة أو إشارة خاطئة", brands:["all"], system:"engine", description:"إشارة تفيد بأن الخانق عالق.", causes:["اتساخ الخانق","حساس/محرك الخانق"], solutions:["تنظيف جسم الخانق","فحص واستبدال الحساس"]},
-{code:"P2195", title:"خليط غني/فقير — تناقض", brands:["all"], system:"fuel", description:"تناقض في قراءة نسبة الوقود.", causes:["حساس O2","تسريب هواء"], solutions:["فحص حساس O2","فحص تسربات الهواء"]},
-{code:"U0100", title:"فقدان الاتصال مع وحدة ECM", brands:["all"], system:"electrical", description:"انقطاع اتصال وحدة التحكم الرئيسية.", causes:["شبكة CAN","ECU"], solutions:["فحص شبكة CAN","فحص ECU"]},
-{code:"U0121", title:"فقدان اتصال مع ABS", brands:["all"], system:"electrical", description:"انقطاع اتصال وحدة مضادة القفل.", causes:["شبكة","وحدة ABS"], solutions:["فحص الوصلات","فحص وحدة ABS"]},
-{code:"B0020", title:"خطأ في نظام الوسائد الهوائية", brands:["all"], system:"safety", description:"خلل في دائرة الوسائد.", causes:["حساس وسائد تالف","توصيلات"], solutions:["فحص الدوائر","استبدال الحساس"]},
-{code:"C0035", title:"حساس زاوية التوجيه — خلل", brands:["all"], system:"safety", description:"خطأ في حساس التوجيه.", causes:["توصيلات","حساس"], solutions:["فحص الحساس","فحص الأسلاك"]},
-{code:"P0261", title:"خلل تسلسل حقن — اسطوانة 1", brands:["all"], system:"fuel", description:"", causes:[""], solutions:[""]},
-{code:"P0262", title:"خلل تسلسل حقن — اسطوانة 2", brands:["all"], system:"fuel", description:"", causes:[""], solutions:[""]},
-{code:"P0304", title:"خلل احتراق اسطوانة 4", brands:["all"], system:"engine", description:"", causes:[""], solutions:[""]},
-{code:"P0305", title:"خلل احتراق اسطوانة 5", brands:["all"], system:"engine", description:"", causes:[""], solutions:[""]},
-{code:"P0306", title:"خلل احتراق اسطوانة 6", brands:["all"], system:"engine", description:"", causes:[""], solutions:[""]},
-{code:"P0402", title:"تدفق زائد EGR", brands:["all"], system:"emissions", description:"تدفق عادم زائد عبر EGR.", causes:["صمام EGR عالق","توصيلات"], solutions:["تنظيف الصمام","فحص الأنابيب"]},
-{code:"P0456", title:"تسريب صغير جدًا في EVAP", brands:["all"], system:"evap", description:"تسريب صغير جداً.", causes:["غطاء البنزين غير محكم","خراطيم"], solutions:["إحكام الغطاء","استبدال الخراطيم"]},
-{code:"P0506", title:"دوران الخمول منخفض جدًا", brands:["all"], system:"engine", description:"دوران الخمول أقل من المتوقع.", causes:["تسريب هواء","خلل الخانق"], solutions:["فحص الخراطيم","تنظيف الخانق"]},
-{code:"P0563", title:"جهد النظام العالي جدًا", brands:["all"], system:"electrical", description:"جهاز شكاوى من زيادة الفولت.", causes:["المنظم معطوب","دوائر"], solutions:["فحص المنظم","فحص النظام الكهربائي"]},
-{code:"P0600", title:"خطأ في التواصل مع وحدة التحكم", brands:["all"], system:"electrical", description:"انقطاع أو تشويش في التواصل.", causes:["أسلاك","ECU"], solutions:["فحص الأسلاك","فحص الوحدات"]},
-{code:"P0601", title:"خطأ ذاكرة ECU", brands:["all"], system:"electrical", description:"فشل في ذاكرة وحدة التحكم.", causes:["برمجة خاطئة","ECU متعب"], solutions:["إعادة برمجة","استبدال ECU"]},
-{code:"P0606", title:"أداء وحدة التحكم ECM", brands:["all"], system:"electrical", description:"تدهور أداء ECM.", causes:["ECU تالف","برمجة"], solutions:["استبدال/إعادة برمجة ECU"]},
-{code:"P0620", title:"خلل دائرة دينمو/مولد", brands:["all"], system:"electrical", description:"خلل في دائرة الدينمو.", causes:["منظم فولتاج","أسلاك"], solutions:["فحص المولد","فحص المنظم"]},
-{code:"P0706", title:"إشارة حساسات ناقل الحركة", brands:["all"], system:"transmission", description:"إشارة خاطئة من حساس ناقل الحركة.", causes:["حساس تالف","توصيلات"], solutions:["استبدال الحساس","فحص التوصيلات"]},
-{code:"P0720", title:"حساس سرعة الناقل/مخرجات السرعة", brands:["all"], system:"transmission", description:"قراءة غير صحيحة لحركة ناقل الحركة.", causes:["حساس السرعة","توصيلات"], solutions:["فحص الحساس","استبدال إن لزم"]},
-{code:"P0731", title:"نسبة التروس غير صحيحة — 1", brands:["all"], system:"transmission", description:"نسبة ترس 1 غير صحيحة.", causes:["حساسات","ميكانيك"], solutions:["فحص الحساس","فحص الميكانيك"]},
-{code:"P0756", title:"صمام التحول 3 دائرة", brands:["all"], system:"transmission", description:"خلل في دائرة صمام النقل 3.", causes:["صمام","أسلاك"], solutions:["فحص/استبدال الصمام","فحص الأسلاك"]},
-{code:"P0796", title:"صمامات التحكم في التبديل — خطأ", brands:["all"], system:"transmission", description:"...", causes:["..."], solutions:["..."]},
-{code:"P1101", title:"تعديل تدفق الهواء/وقود — بعض الأنظمة", brands:["all"], system:"fuel", description:"...", causes:["..."], solutions:["..."]},
-{code:"P1121", title:"حساس خليط محرك — إشارة", brands:["all"], system:"fuel", description:"...", causes:["..."], solutions:["..."]},
-{code:"P1135", title:"حساس O2 دائرة — بنك1", brands:["all"], system:"sensors", description:"...", causes:["..."], solutions:["..."]},
-{code:"P1155", title:"إشارة O2 عالية — بنك1", brands:["all"], system:"sensors", description:"...", causes:["..."], solutions:["..."]},
-{code:"P1166", title:"خلل تحكم وقود — بعض الموديلات", brands:["all"], system:"fuel", description:"...", causes:["..."], solutions:["..."]},
-{code:"P1298", title:"خلل في نظام الوقود — مثال", brands:["all"], system:"fuel", description:"...", causes:["..."], solutions:["..."]},
-{code:"P1345", title:"تزامن الكامات — خطأ", brands:["all"], system:"engine", description:"اختلال توقيت عمود الكامات.", causes:["تذبذب حزام التوقيت","حساسات"], solutions:["فحص الحزام","فحص الحساسات"]},
-{code:"P1456", title:"تسريب نظام EVAP — تعليمات", brands:["all"], system:"evap", description:"...", causes:["..."], solutions:["..."]},
-{code:"P1507", title:"تحكم سرعة الخمول — تعديل", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P1600", title:"خطأ بدء التشغيل/أمن", brands:["all"], system:"electrical", description:"...", causes:["..."], solutions:["..."]},
-{code:"P1706", title:"تنبيه ناقل الحركة — عام", brands:["all"], system:"transmission", description:"...", causes:["..."], solutions:["..."]},
-{code:"P2004", title:"خلل نظام الهواء/عادم", brands:["all"], system:"emissions", description:"...", causes:["..."], solutions:["..."]},
-{code:"P2100", title:"دائرة تحكم دواسة البنزين", brands:["all"], system:"electrical", description:"...", causes:["..."], solutions:["..."]},
-{code:"P2119", title:"إشارة خاطئة لبوابة الخانق", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P2121", title:"حساس دواسة البنزين — إشارة", brands:["all"], system:"electrical", description:"...", causes:["..."], solutions:["..."]},
-{code:"P2176", title:"خليط خلل — تشغيل بارد", brands:["all"], system:"fuel", description:"...", causes:["..."], solutions:["..."]},
-{code:"P2196", title:"خليط بنك متعدد — خطأ", brands:["all"], system:"fuel", description:"...", causes:["..."], solutions:["..."]},
-{code:"P2197", title:"خلل خليط بنك1", brands:["all"], system:"fuel", description:"...", causes:["..."], solutions:["..."]},
-{code:"P2198", title:"خلل خليط بنك2", brands:["all"], system:"fuel", description:"...", causes:["..."], solutions:["..."]},
-{code:"P2200", title:"حساس نسبة الأكاسيد — خلل", brands:["all"], system:"sensors", description:"...", causes:["..."], solutions:["..."]},
-{code:"P2299", title:"ضغط وقود زائد/ناقص — خطأ", brands:["all"], system:"fuel", description:"...", causes:["..."], solutions:["..."]},
-{code:"P2401", title:"حساس تسرب العادم — EGR", brands:["all"], system:"emissions", description:"...", causes:["..."], solutions:["..."]},
-{code:"P2500", title:"حساس نظام الحقن — خلل", brands:["all"], system:"fuel", description:"...", causes:["..."], solutions:["..."]},
-{code:"P2600", title:"دائرة طاقة وحدة تحكم — خطأ", brands:["all"], system:"electrical", description:"...", causes:["..."], solutions:["..."]},
-{code:"P2603", title:"دائرة طاقة ECM — خلل", brands:["all"], system:"electrical", description:"...", causes:["..."], solutions:["..."]},
-{code:"P2610", title:"دائرة حساسية وحدة التحكم", brands:["all"], system:"electrical", description:"...", causes:["..."], solutions:["..."]},
-{code:"P2628", title:"حساس دائرة مولد الطاقة", brands:["all"], system:"electrical", description:"...", causes:["..."], solutions:["..."]},
-{code:"P2630", title:"حساس دائرة السخانات", brands:["all"], system:"electrical", description:"...", causes:["..."], solutions:["..."]},
-{code:"P2700", title:"خلل في صندوق التروس — خطأ عام", brands:["all"], system:"transmission", description:"...", causes:["..."], solutions:["..."]},
-{code:"P2706", title:"حساس ناقل الحركة — دائرة", brands:["all"], system:"transmission", description:"...", causes:["..."], solutions:["..."]},
-{code:"P2730", title:"دائرة التحكم بصمام التحول — 5", brands:["all"], system:"transmission", description:"...", causes:["..."], solutions:["..."]},
-{code:"P2801", title:"حساس ضغط ناقل الحركة", brands:["all"], system:"transmission", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3000", title:"رمز احتياطي — مصمم للتوسيع", brands:["all"], system:"engine", description:"مساحة مخصصة لإدخال رموز إضافية", causes:["..."], solutions:["..."]},
-{code:"P3001", title:"رمز احتياطي 1", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3002", title:"رمز احتياطي 2", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3003", title:"رمز احتياطي 3", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3004", title:"رمز احتياطي 4", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3005", title:"رمز احتياطي 5", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3006", title:"رمز احتياطي 6", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3100", title:"رمز نمطي للتوسيع", brands:["all"], system:"engine", description:"مساحة إضافية", causes:["..."], solutions:["..."]},
-{code:"P3101", title:"رمز توسعة", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3102", title:"رمز توسعة 2", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3103", title:"رمز توسعة 3", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3104", title:"رمز توسعة 4", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3105", title:"رمز توسعة 5", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3106", title:"رمز توسعة 6", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3107", title:"رمز توسعة 7", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3108", title:"رمز توسعة 8", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3109", title:"رمز توسعة 9", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3110", title:"رمز توسعة 10", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3111", title:"رمز توسعة 11", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3112", title:"رمز توسعة 12", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3113", title:"رمز توسعة 13", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3114", title:"رمز توسعة 14", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3115", title:"رمز توسعة 15", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3116", title:"رمز توسعة 16", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3117", title:"رمز توسعة 17", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3118", title:"رمز توسعة 18", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3119", title:"رمز توسعة 19", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3120", title:"رمز توسعة 20", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3121", title:"رمز توسعة 21", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3122", title:"رمز توسعة 22", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3123", title:"رمز توسعة 23", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3124", title:"رمز توسعة 24", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3125", title:"رمز توسعة 25", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3126", title:"رمز توسعة 26", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3127", title:"رمز توسعة 27", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3128", title:"رمز توسعة 28", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3129", title:"رمز توسعة 29", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3130", title:"رمز توسعة 30", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3131", title:"رمز توسعة 31", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3132", title:"رمز توسعة 32", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3133", title:"رمز توسعة 33", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3134", title:"رمز توسعة 34", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3135", title:"رمز توسعة 35", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3136", title:"رمز توسعة 36", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3137", title:"رمز توسعة 37", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3138", title:"رمز توسعة 38", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3139", title:"رمز توسعة 39", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3140", title:"رمز توسعة 40", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3141", title:"رمز توسعة 41", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3142", title:"رمز توسعة 42", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3143", title:"رمز توسعة 43", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3144", title:"رمز توسعة 44", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3145", title:"رمز توسعة 45", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3146", title:"رمز توسعة 46", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3147", title:"رمز توسعة 47", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3148", title:"رمز توسعة 48", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3149", title:"رمز توسعة 49", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3150", title:"رمز توسعة 50", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3151", title:"رمز توسعة 51", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3152", title:"رمز توسعة 52", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3153", title:"رمز توسعة 53", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3154", title:"رمز توسعة 54", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3155", title:"رمز توسعة 55", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3156", title:"رمز توسعة 56", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3157", title:"رمز توسعة 57", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3158", title:"رمز توسعة 58", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3159", title:"رمز توسعة 59", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3160", title:"رمز توسعة 60", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3161", title:"رمز توسعة 61", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3162", title:"رمز توسعة 62", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3163", title:"رمز توسعة 63", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3164", title:"رمز توسعة 64", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3165", title:"رمز توسعة 65", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3166", title:"رمز توسعة 66", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3167", title:"رمز توسعة 67", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3168", title:"رمز توسعة 68", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3169", title:"رمز توسعة 69", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3170", title:"رمز توسعة 70", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3171", title:"رمز توسعة 71", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3172", title:"رمز توسعة 72", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3173", title:"رمز توسعة 73", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3174", title:"رمز توسعة 74", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3175", title:"رمز توسعة 75", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3176", title:"رمز توسعة 76", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3177", title:"رمز توسعة 77", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3178", title:"رمز توسعة 78", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3179", title:"رمز توسعة 79", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3180", title:"رمز توسعة 80", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3181", title:"رمز توسعة 81", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3182", title:"رمز توسعة 82", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3183", title:"رمز توسعة 83", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3184", title:"رمز توسعة 84", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3185", title:"رمز توسعة 85", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3186", title:"رمز توسعة 86", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3187", title:"رمز توسعة 87", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3188", title:"رمز توسعة 88", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3189", title:"رمز توسعة 89", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3190", title:"رمز توسعة 90", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3191", title:"رمز توسعة 91", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3192", title:"رمز توسعة 92", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3193", title:"رمز توسعة 93", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3194", title:"رمز توسعة 94", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3195", title:"رمز توسعة 95", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3196", title:"رمز توسعة 96", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3197", title:"رمز توسعة 97", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3198", title:"رمز توسعة 98", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3199", title:"رمز توسعة 99", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3200", title:"رمز توسعة 100", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3201", title:"رمز توسعة 101", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3202", title:"رمز توسعة 102", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3203", title:"رمز توسعة 103", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3204", title:"رمز توسعة 104", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3205", title:"رمز توسعة 105", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3206", title:"رمز توسعة 106", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3207", title:"رمز توسعة 107", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3208", title:"رمز توسعة 108", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3209", title:"رمز توسعة 109", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3210", title:"رمز توسعة 110", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3211", title:"رمز توسعة 111", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3212", title:"رمز توسعة 112", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3213", title:"رمز توسعة 113", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3214", title:"رمز توسعة 114", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3215", title:"رمز توسعة 115", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3216", title:"رمز توسعة 116", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3217", title:"رمز توسعة 117", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3218", title:"رمز توسعة 118", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3219", title:"رمز توسعة 119", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]},
-{code:"P3220", title:"رمز توسعة 120", brands:["all"], system:"engine", description:"...", causes:["..."], solutions:["..."]}
-]; // نهاية BUILT_IN_DB
+        // Initialize OBD codes
+        const obdSelect = document.getElementById('obdCode');
+        Object.entries(obdCodes).forEach(([code, description]) => {
+            const option = document.createElement('option');
+            option.value = code;
+            option.textContent = `${code} - ${description}`;
+            obdSelect.appendChild(option);
+        });
 
-/* ---------- نماذج الموديلات (مختصرة) ---------- */
-const MODELS = {
-  "all":["عام — غير محدد"],
-  "Renault":["Clio","Symbol","Megane","Kangoo","Captur"],
-  "Peugeot":["206","207","208","301","308"],
-  "Chery":["Tiggo 3","Tiggo 7"],
-  "Fiat":["Punto","500"],
-  "Hyundai":["Accent","i10","i20","Elantra"],
-  "Volkswagen":["Golf","Polo"],
-  "BMW":["3 Series","5 Series"],
-  "Other":["موديل آخر"]
-};
+        // Car brand change handler
+        document.getElementById('carBrand').addEventListener('change', function() {
+            const brand = this.value;
+            const modelSelect = document.getElementById('carModel');
+            
+            // Clear previous options
+            modelSelect.innerHTML = '<option value="">اختر الموديل</option>';
+            
+            if (brand && carModels[brand]) {
+                carModels[brand].forEach(model => {
+                    const option = document.createElement('option');
+                    option.value = model;
+                    option.textContent = model;
+                    modelSelect.appendChild(option);
+                });
+            }
+        });
 
-/* ---------- وظائف المساعد ---------- */
-function fillModels(brand){ const sel=document.getElementById('model'); sel.innerHTML=''; (MODELS[brand]||MODELS['Other']).forEach(m=>{ const o=document.createElement('option'); o.value=m; o.textContent=m; sel.appendChild(o); }); }
-fillModels('all');
-document.getElementById('brand').addEventListener('change', e=> fillModels(e.target.value));
+        // Diagnosis type selection
+        document.querySelectorAll('.diagnosis-type-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Remove active class from all buttons
+                document.querySelectorAll('.diagnosis-type-btn').forEach(b => {
+                    b.classList.remove('bg-primary', 'border-primary');
+                    b.classList.add('bg-dark-lighter', 'border-primary/30');
+                });
+                
+                // Add active class to clicked button
+                this.classList.remove('bg-dark-lighter', 'border-primary/30');
+                this.classList.add('bg-primary', 'border-primary');
+            });
+        });
 
-let IMPORTED_DB = null;
-function getDB(){ return IMPORTED_DB || BUILT_IN_DB; }
+        // Diagnosis function
+        document.getElementById('diagnoseBtn').addEventListener('click', function() {
+            const brand = document.getElementById('carBrand').value;
+            const model = document.getElementById('carModel').value;
+            const year = document.getElementById('carYear').value;
+            const obdCode = document.getElementById('obdCode').value;
+            const manualCode = document.getElementById('manualCode').value.toUpperCase();
+            const selectedType = document.querySelector('.diagnosis-type-btn.bg-primary');
 
-/* ---------- Avatar handling (session storage) ---------- */
-document.getElementById('avatarFile').addEventListener('change', function(e){
-  const f = e.target.files && e.target.files[0];
-  if(!f) return;
-  const r = new FileReader();
-  r.onload = function(){ const data = r.result; const box = document.getElementById('avatarBox'); box.innerHTML=''; const img=document.createElement('img'); img.src=data; img.style.width='100%'; img.style.height='100%'; img.style.objectFit='cover'; box.appendChild(img); try{ sessionStorage.setItem('dali_profile_image', data); }catch(err){} };
-  r.readAsDataURL(f);
-});
-try{ const stored = sessionStorage.getItem('dali_profile_image'); if(stored){ const box=document.getElementById('avatarBox'); box.innerHTML=''; const img=document.createElement('img'); img.src=stored; img.style.width='100%'; img.style.height='100%'; img.style.objectFit='cover'; box.appendChild(img); } }catch(err){}
+            // Validation
+            if (!brand || !model || !year) {
+                showCustomAlert('يرجى ملء جميع البيانات الأساسية للسيارة');
+                return;
+            }
 
-/* ---------- Open codes modal (search & select) ---------- */
-document.getElementById('openCodesBtn').addEventListener('click', ()=> openCodesModal());
+            const finalCode = manualCode || obdCode;
+            if (!finalCode) {
+                showCustomAlert('يرجى اختيار كود التشخيص أو إدخاله يدوياً');
+                return;
+            }
 
-function openCodesModal(initial=''){
-  const overlay = document.createElement('div'); overlay.className='modal-overlay';
-  const modal = document.createElement('div'); modal.className='modal';
-  const header = document.createElement('div'); header.style.display='flex'; header.style.justifyContent='space-between'; header.style.alignItems='center';
-  const h = document.createElement('strong'); h.textContent='قائمة الأكواد (200+) — اختر رمزاً';
-  const close = document.createElement('button'); close.className='btn btn-ghost'; close.textContent='إغلاق'; close.onclick = ()=> overlay.remove();
-  header.appendChild(h); header.appendChild(close); modal.appendChild(header);
+            if (!selectedType) {
+                showCustomAlert('يرجى اختيار نوع التشخيص');
+                return;
+            }
 
-  const search = document.createElement('input'); search.placeholder='ابحث بالكود أو بالكلمة (مثال: P0300 أو محول)'; search.style.width='100%'; search.style.margin='10px 0'; search.style.padding='8px'; modal.appendChild(search);
+            // Show results section and loading
+            document.getElementById('resultsSection').classList.remove('hidden');
+            document.getElementById('loadingAnimation').classList.remove('hidden');
+            document.getElementById('resultsDisplay').classList.add('hidden');
 
-  const sysRow = document.createElement('div'); sysRow.style.display='flex'; sysRow.style.gap='8px'; sysRow.style.marginBottom='8px';
-  const sysSel = document.createElement('select'); ['all','engine','fuel','ignition','emissions','transmission','sensors','electrical','evap','safety'].forEach(s=>{ const o=document.createElement('option'); o.value=s; o.textContent=s==='all'?'كل الأنظمة':s; sysSel.appendChild(o); });
-  sysRow.appendChild(sysSel); modal.appendChild(sysRow);
+            // Simulate diagnosis process
+            setTimeout(() => {
+                performDiagnosis(brand, model, year, finalCode, selectedType.dataset.type);
+            }, 3000);
+        });
 
-  const list = document.createElement('div'); modal.appendChild(list);
+        function performDiagnosis(brand, model, year, code, type) {
+            const description = obdCodes[code] || 'كود غير معروف في قاعدة البيانات';
+            
+            // Generate diagnosis based on code type
+            let diagnosisArabic = '';
+            let diagnosisAlgerian = '';
+            let solutionsArabic = '';
+            let solutionsAlgerian = '';
+            let severity = '';
+            let cost = '';
+            let time = '';
 
-  function render(q=''){
-    list.innerHTML=''; const db = getDB();
-    const qq=(q||'').toLowerCase().trim(); const selSys = sysSel.value;
-    const items = db.filter(it=>{ if(selSys!=='all' && (it.system||'')!==selSys) return false; if(!qq) return true; const hay = (it.code||'')+' '+(it.title||'')+' '+(it.description||'')+' '+(it.causes||[]).join(' '); return hay.toLowerCase().includes(qq); });
-    if(items.length===0){ list.innerHTML='<div class="empty">لا توجد نتائج</div>'; return; }
-    items.slice(0,1200).forEach(it=>{
-      const row = document.createElement('div'); row.className='list-row';
-      row.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;"><div><strong>'+escapeHtml(it.code)+'</strong> <span style="color:var(--muted);margin-right:8px">'+escapeHtml(it.title)+'</span></div><div style="color:var(--muted)">'+((it.brands&&it.brands.length)? it.brands.join(' · '):'عام')+'</div></div>';
-      row.onclick = ()=> { document.getElementById('codeInput').value = it.code || ''; overlay.remove(); };
-      list.appendChild(row);
-    });
-  }
+            // Analyze code type
+            if (code.startsWith('P0')) {
+                // Engine/Powertrain codes
+                severity = 'متوسط إلى عالي';
+                cost = '150 - 800 دج';
+                time = '1-4 ساعات';
+                
+                diagnosisArabic = `تم اكتشاف خلل في نظام المحرك بالكود ${code}. ${description}. هذا الخلل يؤثر على أداء المحرك وقد يؤدي إلى زيادة استهلاك الوقود وانبعاثات ضارة.`;
+                diagnosisAlgerian = `لقينا مشكلة في الموتور بالكود ${code}. ${description}. هاذي المشكلة تأثر على الموتور وممكن تزيد في البنزين وتخرج دخان كثير.`;
+                
+                solutionsArabic = `
+                    <ul class="list-disc list-inside space-y-2">
+                        <li>فحص وتنظيف أو استبدال الحساس المعطل</li>
+                        <li>فحص التوصيلات الكهربائية والأسلاك</li>
+                        <li>إعادة ضبط وحدة التحكم الإلكترونية</li>
+                        <li>فحص مستوى وجودة زيت المحرك</li>
+                        <li>اختبار ضغط المحرك</li>
+                    </ul>
+                `;
+                solutionsAlgerian = `
+                    <ul class="list-disc list-inside space-y-2">
+                        <li>نشوفو ونظفو أو نبدلو الحساس اللي خرب</li>
+                        <li>نشوفو الأسلاك والتوصيلات</li>
+                        <li>نعيدو ضبط الكمبيوتر</li>
+                        <li>نشوفو الزيت وين راه</li>
+                        <li>نقيسو ضغط الموتور</li>
+                    </ul>
+                `;
+            } else if (code.startsWith('P7') || code.startsWith('P1') || code.startsWith('P2')) {
+                // Transmission codes
+                severity = 'عالي';
+                cost = '300 - 1500 دج';
+                time = '2-6 ساعات';
+                
+                diagnosisArabic = `تم اكتشاف خلل في نظام ناقل الحركة بالكود ${code}. ${description}. هذا الخلل يؤثر على نقل الحركة وقد يؤدي إلى صعوبة في التنقل بين السرعات.`;
+                diagnosisAlgerian = `لقينا مشكلة في البوات ڨيتاس بالكود ${code}. ${description}. هاذي المشكلة تأثر على البوات وممكن ما تقدرش تبدل السرعات مليح.`;
+                
+                solutionsArabic = `
+                    <ul class="list-disc list-inside space-y-2">
+                        <li>فحص مستوى وجودة زيت ناقل الحركة</li>
+                        <li>استبدال فلتر ناقل الحركة</li>
+                        <li>فحص الصمامات الهيدروليكية</li>
+                        <li>إعادة برمجة وحدة التحكم</li>
+                        <li>فحص القابض (في الناقل اليدوي)</li>
+                    </ul>
+                `;
+                solutionsAlgerian = `
+                    <ul class="list-disc list-inside space-y-2">
+                        <li>نشوفو زيت البوات وين راه</li>
+                        <li>نبدلو فيلتر البوات</li>
+                        <li>نشوفو الصمامات</li>
+                        <li>نعيدو برمجة الكمبيوتر</li>
+                        <li>نشوفو الدبرياج (إذا كانت مانويل)</li>
+                    </ul>
+                `;
+            } else if (code.startsWith('B0')) {
+                // Body codes
+                severity = 'منخفض إلى متوسط';
+                cost = '50 - 400 دج';
+                time = '30 دقيقة - 2 ساعة';
+                
+                diagnosisArabic = `تم اكتشاف خلل في النظام الكهربائي للجسم بالكود ${code}. ${description}. هذا الخلل يؤثر على الراحة والأمان ولكنه لا يؤثر على الأداء الأساسي للسيارة.`;
+                diagnosisAlgerian = `لقينا مشكلة في كهربا الكروسة بالكود ${code}. ${description}. هاذي المشكلة تأثر على الراحة والأمان بصح ما تأثرش على الموتور.`;
+                
+                solutionsArabic = `
+                    <ul class="list-disc list-inside space-y-2">
+                        <li>فحص الفيوزات والمرحلات</li>
+                        <li>فحص التوصيلات الكهربائية</li>
+                        <li>استبدال المصابيح المحترقة</li>
+                        <li>فحص المفاتيح والأزرار</li>
+                        <li>إعادة ضبط النظام الكهربائي</li>
+                    </ul>
+                `;
+                solutionsAlgerian = `
+                    <ul class="list-disc list-inside space-y-2">
+                        <li>نشوفو الفيوزات والريلايات</li>
+                        <li>نشوفو الأسلاك</li>
+                        <li>نبدلو اللمبات المحروقة</li>
+                        <li>نشوفو الأزرار</li>
+                        <li>نعيدو ضبط الكهربا</li>
+                    </ul>
+                `;
+            } else if (code.startsWith('C0')) {
+                // Chassis codes
+                severity = 'عالي';
+                cost = '200 - 1000 دج';
+                time = '1-4 ساعات';
+                
+                diagnosisArabic = `تم اكتشاف خلل في نظام الهيكل والتعليق بالكود ${code}. ${description}. هذا الخلل يؤثر على الأمان والثبات أثناء القيادة.`;
+                diagnosisAlgerian = `لقينا مشكلة في نظام الفرامل أو التعليق بالكود ${code}. ${description}. هاذي المشكلة خطيرة وتأثر على الأمان.`;
+                
+                solutionsArabic = `
+                    <ul class="list-disc list-inside space-y-2">
+                        <li>فحص نظام المكابح ABS</li>
+                        <li>فحص سائل المكابح</li>
+                        <li>فحص حساسات العجلات</li>
+                        <li>فحص نظام التعليق</li>
+                        <li>إعادة معايرة النظام</li>
+                    </ul>
+                `;
+                solutionsAlgerian = `
+                    <ul class="list-disc list-inside space-y-2">
+                        <li>نشوفو نظام الفرامل ABS</li>
+                        <li>نشوفو سائل الفرامل</li>
+                        <li>نشوفو حساسات الرواح</li>
+                        <li>نشوفو التعليق</li>
+                        <li>نعيدو ضبط النظام</li>
+                    </ul>
+                `;
+            } else if (code.startsWith('U0')) {
+                // Network codes
+                severity = 'متوسط';
+                cost = '100 - 600 دج';
+                time = '1-3 ساعات';
+                
+                diagnosisArabic = `تم اكتشاف خلل في شبكة الاتصال بين وحدات التحكم بالكود ${code}. ${description}. هذا الخلل يؤثر على التواصل بين أنظمة السيارة المختلفة.`;
+                diagnosisAlgerian = `لقينا مشكلة في الشبكة بين الكمبيوترات بالكود ${code}. ${description}. هاذي المشكلة تأثر على التواصل بين الأنظمة.`;
+                
+                solutionsArabic = `
+                    <ul class="list-disc list-inside space-y-2">
+                        <li>فحص شبكة CAN Bus</li>
+                        <li>فحص التوصيلات بين وحدات التحكم</li>
+                        <li>إعادة برمجة الوحدات</li>
+                        <li>فحص الفولتية والتأريض</li>
+                        <li>استبدال الكابلات التالفة</li>
+                    </ul>
+                `;
+                solutionsAlgerian = `
+                    <ul class="list-disc list-inside space-y-2">
+                        <li>نشوفو شبكة CAN Bus</li>
+                        <li>نشوفو التوصيلات بين الكمبيوترات</li>
+                        <li>نعيدو برمجة الوحدات</li>
+                        <li>نشوفو الفولت والتأريض</li>
+                        <li>نبدلو الكابلات الخربانة</li>
+                    </ul>
+                `;
+            } else {
+                // Unknown code
+                severity = 'غير محدد';
+                cost = 'يحتاج فحص';
+                time = 'غير محدد';
+                
+                diagnosisArabic = `تم اكتشاف كود تشخيص ${code} غير معروف في قاعدة البيانات. يُنصح بمراجعة مختص لفحص السيارة وتحديد المشكلة.`;
+                diagnosisAlgerian = `لقينا كود ${code} ما نعرفوش في القاعدة تاعنا. لازم تروح لمختص يشوفلك الكروسة.`;
+                
+                solutionsArabic = `
+                    <ul class="list-disc list-inside space-y-2">
+                        <li>مراجعة مختص في تشخيص السيارات</li>
+                        <li>فحص شامل للأنظمة</li>
+                        <li>استخدام أجهزة تشخيص متقدمة</li>
+                        <li>البحث في قواعد بيانات الشركة المصنعة</li>
+                    </ul>
+                `;
+                solutionsAlgerian = `
+                    <ul class="list-disc list-inside space-y-2">
+                        <li>روح لمختص يعرف الكرهبا</li>
+                        <li>اعمل فحص شامل</li>
+                        <li>استعمل أجهزة قراءة متقدمة</li>
+                        <li>شوف في قاعدة بيانات الشركة</li>
+                    </ul>
+                `;
+            }
 
-  search.addEventListener('input', e=> render(e.target.value));
-  sysSel.addEventListener('change', ()=> render(search.value));
-  render(initial);
-  overlay.appendChild(modal); document.body.appendChild(overlay);
-}
+            // Hide loading and show results
+            document.getElementById('loadingAnimation').classList.add('hidden');
+            document.getElementById('resultsDisplay').classList.remove('hidden');
 
-/* ---------- Analyze function (Arabic output) ---------- */
-function analyze(){
-  const brand=document.getElementById('brand').value || 'all';
-  const model=document.getElementById('model').value || '';
-  const year=document.getElementById('year').value || '';
-  const code=(document.getElementById('codeInput').value||'').trim().toUpperCase();
-  const desc=(document.getElementById('desc').value||'').trim();
-  const sysFilter=document.getElementById('system').value || 'all';
-  const out=document.getElementById('outputArea'); out.innerHTML=''; document.getElementById('metaInfo').textContent = `ماركة: ${brand} · موديل: ${model||'—'} · سنة: ${year||'—'} · كود: ${code||'—'}`;
+            // Update results
+            document.getElementById('diagnosisArabic').textContent = diagnosisArabic;
+            document.getElementById('diagnosisAlgerian').textContent = diagnosisAlgerian;
+            document.getElementById('solutionsArabic').innerHTML = solutionsArabic;
+            document.getElementById('solutionsAlgerian').innerHTML = solutionsAlgerian;
+            document.getElementById('severityLevel').textContent = severity;
+            document.getElementById('estimatedCost').textContent = cost;
+            document.getElementById('repairTime').textContent = time;
+        }
 
-  const db=getDB(); let results=[];
+        function showCustomAlert(message) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            modal.innerHTML = `
+                <div class="bg-dark-light p-6 rounded-lg shadow-lg max-w-sm w-full mx-4 border border-warning">
+                    <div class="text-center">
+                        <i class="fas fa-exclamation-triangle text-warning text-3xl mb-4"></i>
+                        <p class="text-white mb-4">${message}</p>
+                        <button class="px-6 py-2 bg-primary text-white hover:bg-primary/80 rounded-lg" onclick="this.closest('.fixed').remove()">
+                            حسناً
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
 
-  if(code){
-    const exact = db.filter(it => (it.code||'').toString().toUpperCase() === code);
-    if(exact.length) results = results.concat(exact);
-    else {
-      const prefix = code.replace(/[^A-Z0-9]/g,'').toUpperCase();
-      const alt = db.filter(it => ((it.code||'')+'').toUpperCase().includes(prefix));
-      results = results.concat(alt);
-    }
-  }
-
-  if(desc){
-    const toks = desc.toLowerCase().split(/\s+/).filter(t=>t.length>2);
-    const matched = db.filter(it=>{
-      const hay = (it.title||'')+' '+(it.description||'')+' '+(it.causes||[]).join(' ')+' '+(it.solutions||[]).join(' ');
-      const low = hay.toLowerCase();
-      return toks.some(tok => low.includes(tok));
-    });
-    matched.forEach(m=> { if(!results.some(r=>r.code===m.code)) results.push(m); });
-  }
-
-  if(sysFilter!=='all') results = results.filter(r => (r.system||'') === sysFilter);
-
-  if(brand && brand!=='all') results = results.filter(r => { if(!r.brands || r.brands.length===0) return true; return r.brands.includes('all') || r.brands.map(b=>b.toLowerCase()).includes(brand.toLowerCase()); });
-
-  if(results.length===0){
-    const q = (code || desc).toLowerCase();
-    if(q){
-      const fallback = db.filter(it => (((it.code||'')+' '+(it.title||'')+' '+(it.description||'')).toLowerCase().includes(q)));
-      fallback.forEach(m=> { if(!results.some(r=>r.code===m.code)) results.push(m); });
-    }
-  }
-
-  if(results.length===0){
-    out.innerHTML = `<div class="empty"><div style="font-weight:700;margin-bottom:8px">لم نعثر على نتيجة مباشرة</div><div>جرّب كتابة الكود مثل <strong>P0300</strong> أو اضف وصف أو اضغط "اختر كود" لتصفح القائمة.</div></div>`;
-    return;
-  }
-
-  results.forEach(item=>{
-    const el=document.createElement('div'); el.className='fault';
-    el.innerHTML = `
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <div><div style="color:var(--muted);font-size:13px">الكود</div><div style="font-size:18px;font-weight:800">${escapeHtml(item.code)}</div></div>
-        <div style="text-align:left"><div style="font-size:13px;color:var(--muted)">${(item.brands && item.brands.length)? item.brands.join(' · '):'عام'}</div><div style="font-weight:800;margin-top:6px">${escapeHtml(item.title)}</div></div>
-      </div>
-      <div style="margin-top:10px;color:var(--muted)">${escapeHtml(item.description||'')}</div>
-      <div style="margin-top:10px"><strong>الأسباب المحتملة:</strong><ul>${(item.causes||[]).map(c=>`<li>${escapeHtml(c)}</li>`).join('')}</ul></div>
-      <div style="margin-top:6px"><strong>الحلول الممكنة:</strong><ul>${(item.solutions||[]).map(s=>`<li>${escapeHtml(s)}</li>`).join('')}</ul></div>
-    `;
-    out.appendChild(el);
-  });
-
-  // تحليل تجميعي بالعربية
-  const systems = Array.from(new Set(results.map(r=>r.system))).join(' · ') || 'متعددة';
-  const codesList = Array.from(new Set(results.map(r=>r.code))).join(', ');
-  const analysisLines = [];
-  analysisLines.push(`تحليل عام: بناءً على المدخلات (ماركة: ${brand}, موديل: ${model||'غير محدد'}, سنة: ${year||'غير محددة'}) والأكواد/الوصف (${codesList})، الأنظمة المتأثرة: ${systems}.\n`);
-  analysisLines.push(`إجراءات تحقق سريعة:\n1) افحص التوصيلات والفيوزات ومأخذ OBD.\n2) افحص الشمعات والكويلات والماف والبخاخات حسب الأعراض.\n3) نظف حساس MAF وحساسات O2 إن لزم، وراقب Live data قبل الاستبدال.\n4) فحص تسريبات الهواء وخراطيم العادم إن كانت المشاكل خليط/انبعاثات.\n5) لأخطاء ناقل الحركة: اقرأ أكواد TCM ثم تحقق ميكانيكياً.\n`);
-  analysisLines.push(`ملاحظة: هذه إرشادات أولية — قد يتطلب الأمر فحصًا تقنيًا متقدماً (ضغط اسطوانات، فحص كهربائي) للتأكد من الحل النهائي.\n`);
-  const analysisText = analysisLines.join('\n');
-
-  const analysisEl = document.createElement('div'); analysisEl.className='analysis'; analysisEl.style.marginTop='12px';
-  analysisEl.innerHTML = `<h4 style="margin:0 0 8px 0;">🔎 تحليل مفصّل (بالعربية)</h4><pre class="analysis">${escapeHtml(analysisText)}</pre>`;
-  out.appendChild(analysisEl);
-}
-
-/* ---------- Buttons ---------- */
-document.getElementById('analyzeBtn').addEventListener('click', analyze);
-document.getElementById('resetBtn').addEventListener('click', ()=>{
-  document.getElementById('brand').value='all'; fillModels('all'); document.getElementById('year').value=''; document.getElementById('codeInput').value=''; document.getElementById('desc').value=''; document.getElementById('outputArea').innerHTML = '<div class="empty"><div style="font-weight:700;margin-bottom:8px">لم يتم إجراء تشخيص بعد</div><div>أدخل الكود أو اضغط \"اختر كود\" ثم اضغط \"تشخيص الآن\".</div></div>'; document.getElementById('metaInfo').textContent = 'لم يتم إجراء تشخيص — اضغط \"تشخيص الآن\".'; });
-
-document.getElementById('copyBtn').addEventListener('click', ()=>{
-  const txt = document.getElementById('outputArea').innerText;
-  navigator.clipboard?.writeText(txt).then(()=> alert('تم نسخ النص ✅')).catch(()=> alert('فشل النسخ — جرب متصفح أحدث'));
-});
-
-document.getElementById('downloadBtn').addEventListener('click', ()=>{
-  const brand=document.getElementById('brand').value; const model=document.getElementById('model').value; const year=document.getElementById('year').value; const code=document.getElementById('codeInput').value; const desc=document.getElementById('desc').value;
-  const resultsText = document.getElementById('outputArea').innerText;
-  const payload = { brand, model, year, code, desc, resultsText, exportedAt:new Date().toISOString() };
-  const blob = new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}); const url = URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`dali_diag_${Date.now()}.json`; a.click(); URL.revokeObjectURL(url);
-});
-
-/* ---------- Import external JSON DB (for real full set) ---------- */
-document.getElementById('importBtn').addEventListener('click', ()=> document.getElementById('importJson').click());
-document.getElementById('importJson').addEventListener('change', async (e)=>{
-  const f = e.target.files && e.target.files[0];
-  if(!f) return;
-  try{
-    const txt = await f.text(); const json = JSON.parse(txt);
-    if(!Array.isArray(json)) return alert('خطأ: الملف يجب أن يكون مصفوفة JSON.');
-    IMPORTED_DB = json;
-    alert('تم استيراد قاعدة البيانات الخارجية بنجاح — الآن سيتم استخدامها في البحث.');
-  }catch(err){ alert('فشل استيراد JSON: ' + (err.message||err)); }
-});
-
-/* ---------- Utility ---------- */
-function escapeHtml(s){ if(!s) return ''; return s.toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
-
-</script>
+        // Dark mode handling
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+    </script>
 </body>
 </html>
